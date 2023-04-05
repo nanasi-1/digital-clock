@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>時計</title>
+  <meta name="twitter:card" content="summary">
+  <meta property="og:url" content="https://あなたのユーザ名.github.io/assessment/assessment.html">
+  <meta property="og:title" content="時計">
+  <meta property="og:description" content="ただの時計です。モニターにスライドなど映すものがない時にぜひ。">
+  <link rel="stylesheet" href="timeDisplay.css">
+</head>
+
+<body>
+  <link href="https://fonts.googleapis.com/css?family=M+PLUS+1p" rel="stylesheet">
+  <div class="openbtn"><span></span><span></span><span></span></div>
+
+  <div class="display">
+    <div class="overlay">
+      <p>科目名を設定してください。</p>
+      <div class="form-group">
+        <form id="subject-form">
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-1-1" class="ef" placeholder="">
+              <label for="subject-1">1コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-1-2" class="ef" placeholder="">
+              <label for="subject-1">1コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-2-1" class="ef" placeholder="">
+              <label for="subject-2">2コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-2-2" class="ef" placeholder="">
+              <label for="subject-2">2コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-3-1" class="ef" placeholder="">
+              <label for="subject-3">3コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-3-2" class="ef" placeholder="">
+              <label for="subject-3">3コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-4-1" class="ef" placeholder="">
+              <label for="subject-4">4コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-4-2" class="ef" placeholder="">
+              <label for="subject-4">4コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-5-1" class="ef" placeholder="">
+              <label for="subject-5">5コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-5-2" class="ef" placeholder="">
+              <label for="subject-5">5コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="cp_iptxt">
+              <input type="text" id="subject-6-1" class="ef" placeholder="">
+              <label for="subject-6">6コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+            <div class="cp_iptxt">
+              <input type="text" id="subject-6-2" class="ef" placeholder="">
+              <label for="subject-6">6コマ目</label>
+              <span class="focus_line"></span>
+            </div>
+          </div>
+      </div>
+      </form>
+    </div>
+
+    <div id=date class="text"></div>
+    <div id=time class="text"></div>
+    <div id=subject class="text"></div>
+    <div class="leftAndRight">
+      <div id=leftSubject class="leftText subject"></div>
+      <div id=rightSubject class="rightText subject"></div>
+    </div>
+    <div id=diaryMessage class="text message"></div>
+    <div id=countdown class="countdownText"></div>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-bar-inner"></div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="timeDisplay.js"></script>
+</body>
+
+</html>
