@@ -359,6 +359,7 @@ function colorChange() {//背景と文字の色を変える。インターバル
         .then(data => {
             weather = data["weather"][0]["main"];
             const weatherId = data.weather[0].id;
+            console.log(data);
             // 天気情報に応じた背景色を設定する
             
             if(weather == 'Thunderstorm'||weather == 'Drizzle'||weather == 'Rain'||weather == 'Snow'){
