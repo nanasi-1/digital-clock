@@ -21,7 +21,7 @@ function nowLoad() {
     }
     //色変更(15分ごとに)
     if (now.getSeconds() == 0 && now.getMinutes() % 15 == 0 && debugCount % 4 === 0) {
-        console.log(now.getSeconds() == 0 && now.getMinutes() % 15 == 0);
+        console.log(now+' change');
         colorChange();
     }
     debugCount++;
