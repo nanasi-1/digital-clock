@@ -316,7 +316,7 @@ function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSch
         if(currentSubject[0] == 'afterSchool'&&countdownEndTime - nowTime > 10||countdownEndTime <= nowTime){
             return 0;
         }else if(currentSubject[0] == 'afterSchool'){
-            let subjectName = '放課後 終了';
+            subjectName = '放課後 終了';
         }else if (Array.isArray(currentSchedule[5])) {//複数の場合
             subjectName = currentSchedule[5].join('と');
         }
