@@ -317,6 +317,8 @@ function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSch
             return 0;
         }else if(currentSubject[0] == 'afterSchool'){
             let subjectName = '放課後 終了';
+        }else if (Array.isArray(currentSchedule[5])) {//複数の場合
+            subjectName = currentSchedule[5].join('と');
         }
         if (countdownEndTime - nowTime > 1) {//通常
             //休憩時間のカウントダウンが切り捨てのため、辻褄合わせの-1
@@ -324,9 +326,7 @@ function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSch
         } else {//1分未満
             countdownMessage = (countdownEndTime * 60 - nowSecond) + '秒';
         }
-        if (Array.isArray(currentSchedule[5])) {//複数の場合
-            subjectName = currentSchedule[5].join('と');
-        }
+        
         countdownText.innerText = subjectName + 'まで あと' + countdownMessage;
 }
 
