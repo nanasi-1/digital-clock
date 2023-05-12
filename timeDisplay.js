@@ -64,12 +64,12 @@ function updateSubject() {
     ];
     const schedule = [
     //0.曜日        1.はじまりの会  2.1コマ目  3.2コマ目　4.3コマ目   5.4コマ目               6.5コマ目        7.6コマ目  8.おわりの会
-     ['Monday',    'はじまりの会', 'PBL',    'PBL',　 　'基礎学習', '基礎学習',             'プログラミング', '自由選択', 'おわりの会'],
-     ['Tuesday',   'はじまりの会', 'PBL',    'PBL', 　　'基礎学習', '基礎学習',             'プログラミング', '自由選択', 'おわりの会'],
-     ['Wednesday', 'はじまりの会', 'PBL',    'PBL', 　　'基礎学習', ['基礎英語','実用英語'], 'プログラミング', '自由選択', 'おわりの会'],
-     ['Thursday',  'はじまりの会', 'PBL',    'PBL', 　　'基礎学習', '基礎学習',             'プログラミング', '自由選択', 'おわりの会'],
-     ['Friday',    'はじまりの会', 'PBL',    'PBL', 　　'基礎学習', ['基礎英語','実用英語'], 'プログラミング', '自由選択', 'おわりの会'],
-     ['holiday',   'はじまりの会', '1コマ目', '2コマ目',　'3コマ目', '4コマ目',              '5コマ目',      '6コマ目',  'おわりの会'],
+     ['Monday',    'はじまりの会', 'PBL',    'PBL',    '基礎学習', '基礎学習',    'プログラミング', '自由選択', 'おわりの会'],
+     ['Tuesday',   'はじまりの会', 'PBL',    'PBL',    '基礎学習', '基礎学習',    'プログラミング', '自由選択', 'おわりの会'],
+     ['Wednesday', 'はじまりの会', 'PBL',    'PBL',    '基礎学習', 'N-English', 'プログラミング', '自由選択', 'おわりの会'],
+     ['Thursday',  'はじまりの会', 'PBL',    'PBL',    '基礎学習', '基礎学習',    'プログラミング', '自由選択', 'おわりの会'],
+     ['Friday',    'はじまりの会', 'PBL',    'PBL',    '基礎学習', 'N-English', 'プログラミング', '自由選択', 'おわりの会'],
+     ['holiday',   'はじまりの会', '1コマ目', '2コマ目', '3コマ目', '4コマ目',     '5コマ目',      '6コマ目',  'おわりの会'],
     ];
 
     //曜日を取得
@@ -454,6 +454,18 @@ $(".openbtn").click(function() {
         loadInput();
     }
     isOpen = !isOpen;
+});
+
+let isfullScreenOpen = false;
+$(".fullScreenbtn").click(function() {
+    $(this).toggleClass('active');
+
+    if(isfullScreenOpen){
+        document.exitFullscreen();
+    }else{
+        document.documentElement.requestFullscreen();
+    }
+    isfullScreenOpen = !isfullScreenOpen;
 });
 
 //科目名を入力するフォームを取得
