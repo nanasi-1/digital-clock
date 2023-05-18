@@ -333,19 +333,19 @@ function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSch
 //背景パターン
 const backgroundColorCode = [
     ['weather','Clear','Cloudy','Rainy'],
-    ['morning','#87CEEB','#989898','#b4dbf5'],
-    ['afternoon','#00BFFF','#bdbdbd','#c4d8e9'],
-    ['evening','#FFA07A','#808080','#e0e0ff'],
-    ['night','#0B1364','#404040','#2c3e50'],
+    ['morning','#87CEEB','#ffffff','#b4dbf5'],
+    ['afternoon','#00BFFF','#ffffff','#c4d8e9'],
+    ['evening','#FFA07A','#ffffff','#e0e0ff'],
+    ['night','#0B1364','#ffffff','#2c3e50'],
 ];
 
 //文字色パターン
 const textColorCode = [
     ['weather','Clear','Cloudy','Rainy'],
-    ['morning','#ffffff','#ffffff','#353535'],
-    ['afternoon','#ffffff','#4f4f4f','#353535'],
-    ['evening','#ffffff','#ffffff','#353535'],
-    ['night','#ffffff','#ffffff','#ffffff'],
+    ['morning','#ffffff','#4D4D4F','#353535'],
+    ['afternoon','#ffffff','#282928','#353535'],
+    ['evening','#ffffff','#00001C','#353535'],
+    ['night','#ffffff','#002436','#ffffff'],
 ];
 
 function colorChange() {//背景と文字の色を変える。インターバルはこっち。
@@ -416,7 +416,7 @@ function crossFadeColors(pattern){//背景と文字の色のクロスフェー�
     body.style.transition = `background-color ${transitionTime}ms ease`;
     body.style.backgroundColor = bgColor;
 
-    const textElement = document.querySelectorAll("h1, h2, span, a");
+    const textElement = document.querySelectorAll("div, h1, h2, span, a");
     textElement.forEach((element) =>{
         element.style.transition = `color ${transitionTime}ms ease`;
         element.style.color = textColor;
