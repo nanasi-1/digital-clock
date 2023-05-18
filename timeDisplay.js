@@ -416,11 +416,12 @@ function crossFadeColors(pattern){//背景と文字の色のクロスフェー�
     body.style.transition = `background-color ${transitionTime}ms ease`;
     body.style.backgroundColor = bgColor;
 
-    const textElement = document.querySelectorAll("div, h1, h2, span, a");
-    textElement.forEach((element) =>{
+    const textElements = document.querySelectorAll("div, h1, h2, span, a");
+    textElements.forEach((element) => {
         element.style.transition = `color ${transitionTime}ms ease`;
         element.style.color = textColor;
     });
+
 
     //バーの色設定
     const bgColorRGB = {
