@@ -397,7 +397,7 @@ function crossFadeColors(pattern){//背景と文字の色のクロスフェー�
     }
     pattern=pattern.split('-');
     const body = document.body;
-    const transitionTime = 2000;
+    const transitionTime = 2;
 
     let colorCodeNo=[];
     
@@ -413,14 +413,27 @@ function crossFadeColors(pattern){//背景と文字の色のクロスフェー�
     const bgColor = backgroundColorCode[colorCodeNo[0]][colorCodeNo[1]];
     const textColor = textColorCode[colorCodeNo[0]][colorCodeNo[1]];
 
-    body.style.transition = `background-color ${transitionTime}ms ease`;
+    body.style.transition = `background-color ${transitionTime}s ease`;
     body.style.backgroundColor = bgColor;
+
 
     const textElements = document.querySelectorAll("div, h1, h2, span, a");
     textElements.forEach((element) => {
-        element.style.transition = `color ${transitionTime}ms ease`;
+    if (!element.classList.contains("overlay")) {
+        element.style.transition = `color ${transitionTime}s ease`;
         element.style.color = textColor;
+    }
+    
+    const spanElements = document.querySelectorAll("span");
+    spanElements.forEach((span) => {
+        span.style.transition = `background-color ${transitionTime}s ease`;
+        span.style.backgroundColor = textColor;
     });
+});
+
+
+    
+
 
 
     //バーの色設定
