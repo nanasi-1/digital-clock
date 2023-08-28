@@ -575,3 +575,34 @@ function progressBarSet(startDate, endDate, timeTable){
     const progressBar = document.querySelector('.progress-bar-inner');
     progressBar.style.width = `${progress * 100}%`;
 }
+
+//Screen Wake Lock API
+let wakeLock = null;
+
+// 画面をオンに保つための関数
+async function requestWakeLock() {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Screen wake lock acquired');
+
+        // 45分後に画面をオフにする
+        setTimeout(() => {
+            releaseWakeLock();
+        }, 45 * 60 * 1000); // 45分をミリ秒に変換
+    } catch (error) {
+        console.error('Failed to acquire wake lock:', error);
+    }
+}
+
+// 画面をオフにする関数
+function releaseWakeLock() {
+    if (wakeLock !== null) {
+        wakeLock.release();
+        console.log('Screen wake lock released');
+    }
+}
+
+// ページがロードされたときにwake lockをリクエスト
+window.addEventListener('load', () => {
+    requestWakeLock();
+});
