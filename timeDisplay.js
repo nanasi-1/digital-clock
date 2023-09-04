@@ -477,11 +477,16 @@ $(".fullScreenbtn").click(function() {
     if(isfullScreenOpen){
         document.exitFullscreen();
     }else{
-        document.documentElement.requestFullscreen();
+        document.documentElement.requestFullscreen().then(() => {
+            // フルスクリーンがアクティブになったらScreen Wake Lock APIを起動
+            if ($(this).hasClass('active')) {
+                requestWakeLock();
+            }
+        });
     }
+
     isfullScreenOpen = !isfullScreenOpen;
 });
-
 //科目名を入力するフォームを取得
 
 function getSubjectValues(defaultSubject){
@@ -576,7 +581,7 @@ function progressBarSet(startDate, endDate, timeTable){
     progressBar.style.width = `${progress * 100}%`;
 }
 
-//Screen Wake Lock API
+// Screen Wake Lock API
 let wakeLock = null;
 
 // 画面をオンに保つための関数
