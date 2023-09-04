@@ -471,18 +471,28 @@ $(".openbtn").click(function() {
 });
 
 let isfullScreenOpen = false;
+let timerId = null; // setTimeoutのIDを格納する変数
+
 $(".fullScreenbtn").click(function() {
     $(this).toggleClass('active');
 
-    if(isfullScreenOpen){
+    if (isfullScreenOpen) {
         document.exitFullscreen();
-    }else{
+        // フルスクリーンが解除された場合、タイマーをクリア
+        clearTimeout(timerId);
+    } else {
         document.documentElement.requestFullscreen().then(() => {
             // フルスクリーンがアクティブになったらScreen Wake Lock APIを起動
             if ($(this).hasClass('active')) {
                 requestWakeLock();
             }
         });
+        // タイマーがセットされる際に、既存のタイマーをクリア
+        clearTimeout(timerId);
+        // 新しいタイマーをセット
+        timerId = setTimeout(() => {
+            releaseWakeLock();
+        }, 45 * 60 * 1000); // 45分をミリ秒に変換
     }
 
     isfullScreenOpen = !isfullScreenOpen;
