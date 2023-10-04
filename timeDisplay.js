@@ -660,7 +660,7 @@ async function disableWakeLock() {
 }
 
 //タイムアウトする時間（分単位）
-const TimeoutMinutes = 45;//0の場合タイムアウトは無し
+const TimeoutMinutes = 60;//0の場合タイムアウトは無し
 console.log("フルスクリーンボタンを押してから"+TimeoutMinutes+"分スリープ機能をブロックします。");
 // setTimeoutを実行する関数
 
