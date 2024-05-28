@@ -450,19 +450,27 @@ function crossFadeColors(pattern) {//背景と文字の色のクロスフェー�
     }
 }
 
-//ボタンの見た目切り替え
-let isOpen = false;
-$(".openbtn").click(function () {
-    $(this).toggleClass('active');
-    //ボタンを押された時の背景を暗く
-    $(".overlay").toggleClass('active');
+//設定開閉ボタン
+document.querySelector(".openbtn").addEventListener('click', function (e) {
+    /** 設定開閉ボタン @type {HTMLButtonElement} */
+    const btn = e.target.nodeName === 'DIV' ? e.target : e.target.parentElement
+    //↑spanタグでイベントが発火するバグがあるため、spanの場合は親要素を取得
+
+    //設定が開かれているかどうか
+    const isOpen = btn.dataset['isOpen'] === 'true'
+
+    //見た目の切り替え
+    btn.classList.toggle('active');
+    document.querySelector(".overlay").classList.toggle('active'); //ボタンを押された時の背景を暗く
 
     if (isOpen) {
         saveInput();
     } else {
         loadInput();
     }
-    isOpen = !isOpen;
+    
+    //開かれているかどうかの更新
+    btn.dataset['isOpen'] = !isOpen;
 });
 
 let isFullScreenOpen = false;
@@ -481,8 +489,10 @@ function toggleFullScreen() {
     isFullScreenOpen = !isFullScreenOpen;
 }
 //fullScreenbtnが押された時、activeを切り替え
-$(".fullScreenbtn").click(function () {
-    $(this).toggleClass('active');
+document.querySelector(".fullScreenbtn").addEventListener('click', function (e) {
+    /** フルスクリーン切り替えボタン @type {HTMLButtonElement} */
+    const btn = e.target
+    btn.classList.toggle('active');
     toggleFullScreen();
 });
 
@@ -520,18 +530,18 @@ async function lockEscapeKey() {
 //科目名を入力するフォームを取得
 
 function getSubjectValues(defaultSubject) {
-    const subject1_1 = $('#subject-1-1').val();
-    const subject1_2 = $('#subject-1-2').val();
-    const subject2_1 = $('#subject-2-1').val();
-    const subject2_2 = $('#subject-2-2').val();
-    const subject3_1 = $('#subject-3-1').val();
-    const subject3_2 = $('#subject-3-2').val();
-    const subject4_1 = $('#subject-4-1').val();
-    const subject4_2 = $('#subject-4-2').val();
-    const subject5_1 = $('#subject-5-1').val();
-    const subject5_2 = $('#subject-5-2').val();
-    const subject6_1 = $('#subject-6-1').val();
-    const subject6_2 = $('#subject-6-2').val();
+    const subject1_1 = document.querySelector('#subject-1-1').value;
+    const subject1_2 = document.querySelector('#subject-1-2').value;
+    const subject2_1 = document.querySelector('#subject-2-1').value;
+    const subject2_2 = document.querySelector('#subject-2-2').value;
+    const subject3_1 = document.querySelector('#subject-3-1').value;
+    const subject3_2 = document.querySelector('#subject-3-2').value;
+    const subject4_1 = document.querySelector('#subject-4-1').value;
+    const subject4_2 = document.querySelector('#subject-4-2').value;
+    const subject5_1 = document.querySelector('#subject-5-1').value;
+    const subject5_2 = document.querySelector('#subject-5-2').value;
+    const subject6_1 = document.querySelector('#subject-6-1').value;
+    const subject6_2 = document.querySelector('#subject-6-2').value;
 
     const subjectValues = [
         [subject1_1, subject1_2],
