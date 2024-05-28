@@ -533,30 +533,14 @@ async function lockEscapeKey() {
   lockEscapeKey();
 
 
-//科目名を入力するフォームを取得
-
+/** 科目名を入力するフォームを取得 */
 function getSubjectValues(defaultSubject) {
-    const subject1_1 = document.querySelector('#subject-1-1').value;
-    const subject1_2 = document.querySelector('#subject-1-2').value;
-    const subject2_1 = document.querySelector('#subject-2-1').value;
-    const subject2_2 = document.querySelector('#subject-2-2').value;
-    const subject3_1 = document.querySelector('#subject-3-1').value;
-    const subject3_2 = document.querySelector('#subject-3-2').value;
-    const subject4_1 = document.querySelector('#subject-4-1').value;
-    const subject4_2 = document.querySelector('#subject-4-2').value;
-    const subject5_1 = document.querySelector('#subject-5-1').value;
-    const subject5_2 = document.querySelector('#subject-5-2').value;
-    const subject6_1 = document.querySelector('#subject-6-1').value;
-    const subject6_2 = document.querySelector('#subject-6-2').value;
-
-    const subjectValues = [
-        [subject1_1, subject1_2],
-        [subject2_1, subject2_2],
-        [subject3_1, subject3_2],
-        [subject4_1, subject4_2],
-        [subject5_1, subject5_2],
-        [subject6_1, subject6_2],
-    ];
+    /** フォームの値を取得 @type {string[][]} */
+    const subjectValues = Array(6).fill(Array(2).fill()) //6*2の配列を作成
+    .map((arr, period) => arr.map((_, i) => {
+        //input要素の値を取得
+        return document.querySelector(`#subject-${period + 1}-${i + 1}`).value;
+    }));
 
     for (let i = 0; i < subjectValues.length; i++) {//+2してるのはdefaultSubjectのズレに合わせているため
         if (subjectValues[i][0] != '' && subjectValues[i][1] != '') {//両方空白ではない場合
