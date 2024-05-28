@@ -2,7 +2,11 @@
 window.addEventListener('load', function () {
     nowLoad();
     colorChange();
-    localStorageClear();
+    
+    //リンクから開いた時、ローカルストレージを削除
+    if (performance.navigation.type == 0) {
+        window.localStorage.clear();
+    }
 })
 
 //デバック用
@@ -463,13 +467,19 @@ document.querySelector(".openbtn").addEventListener('click', function (e) {
     btn.classList.toggle('active');
     document.querySelector(".overlay").classList.toggle('active'); //ボタンを押された時の背景を暗く
 
-    if (isOpen) {
-        saveInput();
-    } else {
-        loadInput();
+    //ローカルストレージと入力欄を連動させる
+    const inputs = document.querySelectorAll('#subject-form input[id*="subject"]');
+    for (const input of inputs) {
+        if(isOpen) {
+            //入力欄の内容をローカルストレージに反映する
+            localStorage.setItem(input.id, input.value);
+        } else {
+            //ローカルストレージの内容を入力欄に反映する
+            input.value = localStorage.getItem(input.id);
+        }
     }
-    
-    //開かれているかどうかの更新
+
+    //開かれているかどうかを更新
     btn.dataset['isOpen'] = !isOpen;
 });
 
@@ -557,29 +567,6 @@ function getSubjectValues(defaultSubject) {
     }
 
     return defaultSubject;
-}
-
-//入力欄を保存する
-const inputs = document.querySelectorAll('input');
-const inputsName = Array.from(inputs).map(input => input.id);
-
-function loadInput() {
-    for (let i = 0; i < inputs.length; i++) {
-        inputs[i].value = localStorage.getItem(inputsName[i]);
-    }
-}
-
-function saveInput() {
-    for (let i = 0; i < inputs.length; i++) {
-        localStorage.setItem(inputsName[i], inputs[i].value);
-    }
-}
-
-//リンクから開いた時、ローカルストレージを削除
-function localStorageClear() {
-    if (performance.navigation.type == 0) {
-        window.localStorage.clear();
-    }
 }
 
 //画面下のバー
