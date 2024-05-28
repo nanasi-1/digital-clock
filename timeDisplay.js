@@ -4,8 +4,10 @@ window.addEventListener('load', function () {
     colorChange();
     
     //リンクから開いた時、ローカルストレージを削除
-    if (performance.navigation.type == 0) {
-        window.localStorage.clear();
+    const type = performance.getEntriesByType('navigation')[0]?.type
+    if (type === 'navigate' || type === 'back_forward') {
+        console.log('clear')
+        localStorage.clear();
     }
 })
 
