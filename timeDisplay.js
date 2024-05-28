@@ -473,38 +473,32 @@ document.querySelector(".openbtn").addEventListener('click', function (e) {
     btn.dataset['isOpen'] = !isOpen;
 });
 
-let isFullScreenOpen = false;
-//フルスクリーンボタン
-function toggleFullScreen() {
-    if (isFullScreenOpen) {
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        }
-        console.log("フルスクリーンoff");
+//フルスクリーン切り替えボタンにイベントを追加
+document.querySelector(".fullScreenbtn").addEventListener('click', function (e) {
+    /** フルスクリーン切り替えボタン @type {HTMLElement} */
+    const btn = e.target.nodeName === 'DIV' ? e.target : e.target.parentElement
+    //↑spanタグでイベントが発火するバグがあるため、spanの場合は親要素を取得
+
+    //設定が開かれているかどうか
+    const isFullscreen = !!document.fullscreenElement
+
+    //見た目の切り替え
+    btn.classList.toggle('active');
+
+    if (isFullscreen) {
+        document.exitFullscreen();
     } else {
         document.documentElement.requestFullscreen();
         enableWakeLock()
-        console.log("フルスクリーンon");
     }
-    isFullScreenOpen = !isFullScreenOpen;
-}
-//fullScreenbtnが押された時、activeを切り替え
-document.querySelector(".fullScreenbtn").addEventListener('click', function (e) {
-    /** フルスクリーン切り替えボタン @type {HTMLButtonElement} */
-    const btn = e.target
-    btn.classList.toggle('active');
-    toggleFullScreen();
 });
 
 //フルスクリーンOFFになったら...
 document.addEventListener('fullscreenchange', function () {
-    if (!document.fullscreenElement) {
-      // フルスクリーンがオフになったときに実行したい関数をここに呼び出す
-      document.querySelector (".fullScreenbtn").classList.remove('active');
-      isFullScreenOpen = false;
-      disableWakeLock();
-    }
-  });
+    if (document.fullscreenElement) return; //ONになる場合は中止
+    document.querySelector(".fullScreenbtn").classList.remove('active')
+    disableWakeLock();
+});
 
 //escロック
 async function lockEscapeKey() {
