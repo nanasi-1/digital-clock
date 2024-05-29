@@ -4,9 +4,8 @@ window.addEventListener('DOMContentLoaded', () => {
     colorChange();
     
     //リンクから開いた時、ローカルストレージを削除
-    const type = performance.getEntriesByType('navigation')[0]?.type
+    const type = performance.getEntriesByType('navigation')[0]?.type;
     if (type === 'navigate' || type === 'back_forward') { // 挙動を揃えるためback_forwardも入れてる
-        console.log('clear')
         localStorage.clear();
     }
 })
@@ -460,7 +459,7 @@ function crossFadeColors(pattern) {//背景と文字の色のクロスフェー�
 }
 
 //設定開閉ボタン
-document.querySelector(".openbtn").addEventListener('click', function (e) {
+document.querySelector(".openBtn").addEventListener('click', (e) => {
     /** 設定開閉ボタン @type {HTMLButtonElement} */
     const btn = e.target.nodeName === 'DIV' ? e.target : e.target.parentElement
     //↑spanタグでイベントが発火するバグがあるため、spanの場合は親要素を取得
@@ -489,7 +488,7 @@ document.querySelector(".openbtn").addEventListener('click', function (e) {
 });
 
 //フルスクリーン切り替えボタンにイベントを追加
-document.querySelector(".fullScreenbtn").addEventListener('click', function (e) {
+document.querySelector(".fullScreenBtn").addEventListener('click', (e) => {
     /** フルスクリーン切り替えボタン @type {HTMLElement} */
     const btn = e.target.nodeName === 'DIV' ? e.target : e.target.parentElement
     //↑spanタグでイベントが発火するバグがあるため、spanの場合は親要素を取得
@@ -509,9 +508,9 @@ document.querySelector(".fullScreenbtn").addEventListener('click', function (e) 
 });
 
 //フルスクリーンOFFになったら...
-document.addEventListener('fullscreenchange', function () {
+document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) return; //ONになる場合は中止
-    document.querySelector(".fullScreenbtn").classList.remove('active')
+    document.querySelector(".fullScreenBtn").classList.remove('active')
     disableWakeLock();
 });
 
@@ -633,7 +632,7 @@ async function disableWakeLock() {
 }
 
 //タイムアウトする時間（分単位）
-const TimeoutMinutes = 0.1;//0の場合タイムアウトは無し
+const TimeoutMinutes = 0;//0の場合タイムアウトは無し
 console.log(`フルスクリーンボタンを押してから${TimeoutMinutes}分スリープ機能をブロックします。`);
 
 /** setTimeoutを実行する関数 */
@@ -648,9 +647,10 @@ function startTimeout() {
     console.log(`${timeoutTime.getHours()}:${timeoutTime.getMinutes()}:${timeoutTime.getSeconds()}までスリープ機能をブロックします。`);
 
     // 後でWake Lockを解除する
-    const timeoutIdOutput = setTimeout(function () {
-        disableWakeLock();
-    }, TimeoutMinutes * 60 * 1000);
+    const timeoutIdOutput = setTimeout(
+        disableWakeLock, 
+        TimeoutMinutes * 60 * 1000
+    );
 
     // setTimeoutのIDを返す（後でキャンセルするために必要）
     return timeoutIdOutput;

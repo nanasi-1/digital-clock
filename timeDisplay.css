@@ -65,7 +65,7 @@ body{
 
 
 /*ボタン*/
-.openbtn{
+.openBtn{
     position: relative;
     width: 50px;
     height: 50px;
@@ -76,7 +76,7 @@ body{
     z-index: 110;
 }
 
-.openbtn span{
+.openBtn span{
     display: inline-block;
     transition: all.5s;
     position: absolute;
@@ -87,39 +87,39 @@ body{
     width: 45%;
 }
 
-.openbtn span:nth-of-type(1){
+.openBtn span:nth-of-type(1){
     top: 25px;
     transform:rotate(90deg);
     left: 6.5px;
 }
 
-.openbtn span:nth-of-type(2){
+.openBtn span:nth-of-type(2){
     top: 25px;
     transform:rotate(55deg);
     width: 27px;
     left: 12px;
 }
-.openbtn span:nth-of-type(3){
+.openBtn span:nth-of-type(3){
     top: 25px;
     transform:rotate(90deg);
     left: 22px;
 }
 
-.openbtn.active{
+.openBtn.active{
     transform: rotate(360deg);
 }
-.openbtn.active span:nth-of-type(1){
+.openBtn.active span:nth-of-type(1){
     top: 18px;
     left: 18px;
     transform: translateY(6px)rotate(135deg);
     width: 30%;
 }
 
-.openbtn.active span:nth-of-type(2){
+.openBtn.active span:nth-of-type(2){
     opacity: 0;
 }
 
-.openbtn.active span:nth-of-type(3){
+.openBtn.active span:nth-of-type(3){
     top: 30px;
     left: 18px;
     transform: translateY(-6px)rotate(45deg);
@@ -243,7 +243,7 @@ body{
 }
 
 /*フルスクリーンボタン*/
-.fullScreenbtn{
+.fullScreenBtn{
     position: fixed;
     width: 50px;
     height: 50px;
@@ -256,7 +256,7 @@ body{
     z-index: 110;
 }
 
-.fullScreenbtn span{
+.fullScreenBtn span{
     display: inline-block;
     transition: all.5s;
     position: absolute;
@@ -267,72 +267,72 @@ body{
     width: 10px;
 }
 
-.fullScreenbtn span:nth-of-type(1){
+.fullScreenBtn span:nth-of-type(1){
     top: 0px;
     right: 28px;
 }
-.fullScreenbtn span:nth-of-type(2){
+.fullScreenBtn span:nth-of-type(2){
     top: 0px;
 }
-.fullScreenbtn span:nth-of-type(3){
+.fullScreenBtn span:nth-of-type(3){
     top: 4px;
     transform: rotate(90deg);
     right: 6.5px;
 }
-.fullScreenbtn span:nth-of-type(4){
+.fullScreenBtn span:nth-of-type(4){
     top: 23px;
     transform: rotate(90deg);
     right: 6.5px;
 }
-.fullScreenbtn span:nth-of-type(5){
+.fullScreenBtn span:nth-of-type(5){
     top: 27px;
 }
-.fullScreenbtn span:nth-of-type(6){
+.fullScreenBtn span:nth-of-type(6){
     top: 27px;
     right: 28px;
 }
-.fullScreenbtn span:nth-of-type(7){
+.fullScreenBtn span:nth-of-type(7){
     top: 23px;
     transform: rotate(90deg);
     right: 31.5px;
 }
-.fullScreenbtn span:nth-of-type(8){
+.fullScreenBtn span:nth-of-type(8){
     top: 4px;
     transform: rotate(90deg);
     right: 31.5px;
 }
 
 
-.fullScreenbtn.active span:nth-of-type(1){
+.fullScreenBtn.active span:nth-of-type(1){
     top: 8px;
     right: 28px;
 }
-.fullScreenbtn.active span:nth-of-type(2){
+.fullScreenBtn.active span:nth-of-type(2){
     top: 8px;
 }
-.fullScreenbtn.active span:nth-of-type(3){
+.fullScreenBtn.active span:nth-of-type(3){
     top: 4px;
     transform: rotate(90deg);
     right: 13.5px;
 }
-.fullScreenbtn.active span:nth-of-type(4){
+.fullScreenBtn.active span:nth-of-type(4){
     top: 23px;
     transform: rotate(90deg);
     right: 13.5px;
 }
-.fullScreenbtn.active span:nth-of-type(5){
+.fullScreenBtn.active span:nth-of-type(5){
     top: 19px;
 }
-.fullScreenbtn.active span:nth-of-type(6){
+.fullScreenBtn.active span:nth-of-type(6){
     top: 19px;
     right: 28px;
 }
-.fullScreenbtn.active span:nth-of-type(7){
+.fullScreenBtn.active span:nth-of-type(7){
     top: 23px;
     transform: rotate(90deg);
     right: 24.5px;
 }
-.fullScreenbtn.active span:nth-of-type(8){
+.fullScreenBtn.active span:nth-of-type(8){
     top: 4px;
     transform: rotate(90deg);
     right: 24.5px;
