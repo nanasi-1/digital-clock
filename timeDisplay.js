@@ -512,25 +512,23 @@ document.addEventListener('fullscreenchange', function () {
     disableWakeLock();
 });
 
-//escロック
+/** escキー長押しでフルスクリーンを抜けるようにする */
 async function lockEscapeKey() {
-    try {
-      const keyboard = await navigator.keyboard.lock(['Escape']);
-      
-      keyboard.addEventListener('keydown', (event) => {
-        // "esc" キーが押された場合のカスタムアクションをここに追加します
-        console.log('esc キーがロックされました。');
-      });
-  
-      keyboard.addEventListener('keyup', (event) => {
-        // "esc" キーが離された場合のカスタムアクションをここに追加します
-        console.log('esc キーがロック解除されました。');
-      });
-    } catch (error) {
+    //対応していない場合はreturn
+    if(!('keyboard' in navigator)) {
+        console.warn('Keyboard APIはこのブラウザでサポートされていません。');
+        return;
     }
-  }
 
-  lockEscapeKey();
+    try {
+        //escキーをロックする
+        await navigator.keyboard.lock(['Escape']);
+    } catch (e) {
+        console.info('escキーをロックできませんでした:', e)
+    }
+}
+
+lockEscapeKey();
 
 
 /** 科目名を入力するフォームを取得 */
