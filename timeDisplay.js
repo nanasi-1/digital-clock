@@ -1,53 +1,56 @@
 //開いた時...
-window.addEventListener('load', function () {
+window.addEventListener('DOMContentLoaded', () => {
     nowLoad();
     colorChange();
     
     //リンクから開いた時、ローカルストレージを削除
     const type = performance.getEntriesByType('navigation')[0]?.type
-    if (type === 'navigate' || type === 'back_forward') {
+    if (type === 'navigate' || type === 'back_forward') { // 挙動を揃えるためback_forwardも入れてる
         console.log('clear')
         localStorage.clear();
     }
 })
 
 //デバック用
-let debugCount = 1;
+//現在時刻を変更するときはtrueを代入する
 let isDebug = false;
-//現在時刻取得(通常は空白)
+
+//同じ秒で色変更などの処理が起こるのを防止する用
+let msCount = 1;
+
+//現在時刻取得(通常は空文字列)
 let now = '';
 function nowLoad() {
-    if (isDebug == false) {
-        now = new Date();
-    } else {
+    if (isDebug) {
         now = new Date(now);
-        if (debugCount % 4 === 0) {
+        if (msCount % 4 === 0) {
             now.setSeconds(now.getSeconds() + 1);
         }
+    } else {
+        now = new Date();
     }
+    
     //色変更(15分ごとに)
-    if (now.getSeconds() == 0 && now.getMinutes() % 15 == 0 && debugCount % 4 === 0) {
+    if (now.getSeconds() === 0 && now.getMinutes() % 15 === 0 && msCount % 4 === 0) {
         console.log(now + ' change');
         colorChange();
     }
-    debugCount++;
+    msCount++;
 }
-setInterval("nowLoad()", 250);
+setInterval(nowLoad, 250);
 
-
-//日付と時間表示
+/** 画面の日付と時刻を更新 */
 function updateDate() {
     const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
 
     //日付
     document.getElementById('date').innerText =
-        now.toLocaleDateString() + '(' + weekDays[now.getDay()] + ')';
+        `${now.toLocaleDateString()}(${weekDays[now.getDay()]})`;
 
-    //時間
+    //時刻
     document.getElementById('time').innerText =
         now.toLocaleTimeString();
 }
-
 setInterval(updateDate, 250);
 
 function updateSubject() {
