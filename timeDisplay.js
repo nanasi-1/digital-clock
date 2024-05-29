@@ -1,6 +1,6 @@
 //開いた時...
 window.addEventListener('DOMContentLoaded', () => {
-    nowLoad();
+    updateNow();
     colorChange();
     
     //リンクから開いた時、ローカルストレージを削除
@@ -19,7 +19,7 @@ let msCount = 1;
 
 //現在時刻取得(通常は空文字列)
 let now = '';
-function nowLoad() {
+function updateNow() {
     if (isDebug) {
         now = new Date(now);
         if (msCount % 4 === 0) {
@@ -28,29 +28,23 @@ function nowLoad() {
     } else {
         now = new Date();
     }
+
+    //画面の日付と時刻を更新
+    const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][now.getDay()];
+    document.getElementById('date').innerText = //日付
+        `${now.toLocaleDateString()}(${dayOfWeek})`;
+    document.getElementById('time').innerText = //時刻
+        now.toLocaleTimeString();
     
     //色変更(15分ごとに)
     if (now.getSeconds() === 0 && now.getMinutes() % 15 === 0 && msCount % 4 === 0) {
         console.log(now + ' change');
         colorChange();
     }
+
     msCount++;
 }
-setInterval(nowLoad, 250);
-
-/** 画面の日付と時刻を更新 */
-function updateDate() {
-    const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
-
-    //日付
-    document.getElementById('date').innerText =
-        `${now.toLocaleDateString()}(${weekDays[now.getDay()]})`;
-
-    //時刻
-    document.getElementById('time').innerText =
-        now.toLocaleTimeString();
-}
-setInterval(updateDate, 250);
+setInterval(updateNow, 250);
 
 function updateSubject() {
     /*
