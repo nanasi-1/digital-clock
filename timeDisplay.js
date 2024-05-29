@@ -350,37 +350,49 @@ const textColorCode = [
     ['night', '#ffffff', '#002436', '#ffffff'],
 ];
 
-function colorChange() {//背景と文字の色を変える。インターバルはこっち。
+/** 背景と文字の色を変える。インターバルはこっち。 */
+async function colorChange() {
     const API_KEY = 'df3ff73321f444bbb1e2f97a6bfaa639';
     const CITY = 'tokyo';
 
-    let weather;
-
-    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}`)
+    /** 
+     * APIから取得した天気データ
+     * @type {{weather: {main: string, id: number}[]}} （簡易的な型）
+     * @see https://openweathermap.org/current
+     * @see https://openweathermap.org/weather-conditions
+     */
+    const data = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}`)
         .then(response => response.json())
-        .then(data => {
-            weather = data["weather"][0]["main"];
-            const weatherId = data.weather[0].id;
-            console.log(data);
-            // 天気情報に応じた背景色を設定する
 
-            if (weather == 'Thunderstorm' || weather == 'Drizzle' || weather == 'Rain' || weather == 'Snow') {
-                console.log('weather -> Rainy');
-                weather = 'Rainy';
-            } else if (weatherId == 803 || weatherId == 804) {
-                console.log('weather -> Cloudy');
-                weather = 'Cloudy';
-            } else {
-                console.log('weather -> Clear');
-                weather = 'Clear';
-            }
+    const weatherGroup = data.weather[0].main;
+    const weatherId = data.weather[0].id;
+    console.log(data);
 
-            crossFadeColors(weather);
-        });
+    // crossFadeColorsに適した文字列に変更
+    let weather = '';
+    if (weatherId === 803 || weatherId === 804) {
+        // 曇り：コードが803か804（雲が51%以上）のとき
+        console.log('weather -> Cloudy');
+        weather = 'Cloudy';
+    } else if (weatherGroup === 'Clear' || weatherGroup === 'Clouds' || weatherGroup === 'Atmosphere') {
+        // 晴れ：雲が50%以下のとき&グループがClearかAtmosphereのとき
+        console.log('weather -> Clear');
+        weather = 'Clear';
+    } else {
+        // 雨：グループがThunderstormかDrizzleかRainかSnowのとき（その他）
+        console.log('weather -> Rainy');
+        weather = 'Rainy';
+    }
 
+    crossFadeColors(weather);
 }
 
-function crossFadeColors(pattern) {//背景と文字の色のクロスフェードを行う。デバックならこちら推奨
+/** 
+ * 天気情報に応じて背景と文字の色のクロスフェードを行う。  
+ * 色のデバッグならこちら推奨。
+ * @param {'Clear' | 'Cloudy' | 'Rainy'} pattern 天気の文字列
+ */
+function crossFadeColors(pattern) {
     //patter -> Clear-morning
     if (pattern.includes('-') == false) {
         pattern[0] = pattern;
