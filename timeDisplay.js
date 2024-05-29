@@ -593,18 +593,15 @@ let timeoutId = 0; //タイムアウトID
 async function enableWakeLock() {
     try {
         // Wake Lock APIをサポートしているか確認
-        if ('wakeLock' in navigator) {
-            // Wake Lockを要求し、Wake Lockオブジェクトを取得
-            wakeLock = await navigator.wakeLock.request('screen');
-
-            // Wake Lockが取得できたら、成功メッセージを表示
-            console.log('Wake LockがONになりました。');
-            //タイムアウト開始
-            timeoutId = startTimeout();
-            //console.log("ID->"+timeoutId);
-        } else {
+        if (!('wakeLock' in navigator)) {
             console.log('Wake Lock APIはこのブラウザでサポートされていません。');
         }
+
+        // Wake Lockを要求し、Wake Lockオブジェクトを取得
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Wake LockがONになりました。');
+        //タイムアウト開始
+        timeoutId = startTimeout();
     } catch (error) {
         console.error('Wake Lockを有効にできませんでした。', error);
     }
@@ -614,65 +611,61 @@ async function enableWakeLock() {
 async function disableWakeLock() {
     try {
         // wakeLockオブジェクトが存在するか確認
-        if (wakeLock !== null) {
-            //タイムアウトが続行中のみ
-            if (checkTimeout()) {
-            // Wake Lockを解放
-            await wakeLock.release();
-
-            // Wake Lockが解放されたら、成功メッセージを表示
-                console.log('Wake LockがOFFになりました。');
-
-                timeoutId = null;
-                timeoutId = cancelTimeout(timeoutId);
-            }
-        } else {
+        if (wakeLock === null) {
             console.log('Wake LockがONにされていません。');
         }
+
+        //タイムアウトが続行中のみ
+        if (!checkTimeout()) return;
+
+        // Wake Lockを解放
+        await wakeLock.release();
+        console.log('Wake LockがOFFになりました。');
+
+        timeoutId = null;
+        timeoutId = cancelTimeout(timeoutId);
     } catch (error) {
         console.error('Wake Lockを解放できませんでした。', error);
     }
 }
 
 //タイムアウトする時間（分単位）
-const TimeoutMinutes = 0;//0の場合タイムアウトは無し
-console.log("フルスクリーンボタンを押してから"+TimeoutMinutes+"分スリープ機能をブロックします。");
-// setTimeoutを実行する関数
+const TimeoutMinutes = 0.1;//0の場合タイムアウトは無し
+console.log(`フルスクリーンボタンを押してから${TimeoutMinutes}分スリープ機能をブロックします。`);
 
+/** setTimeoutを実行する関数 */
 function startTimeout() {
-    timeoutIdOutput = null;
+    //0以下ならタイムアウトしない
+    if (TimeoutMinutes <= 0) {
+        return null
+    }
 
-    if(TimeoutMinutes > 0){
     //「この時間までスリープ機能をブロックします。」メッセージ
-    let timeoutTime = new Date(now.getTime() + TimeoutMinutes * 60 * 1000);
-    console.log(timeoutTime.getHours()+':'+timeoutTime.getMinutes()+':'+timeoutTime.getSeconds()+'までスリープ機能をブロックします。');
+    const timeoutTime = new Date(now.getTime() + TimeoutMinutes * 60 * 1000);
+    console.log(`${timeoutTime.getHours()}:${timeoutTime.getMinutes()}:${timeoutTime.getSeconds()}までスリープ機能をブロックします。`);
 
-    // 後に実行する
-    timeoutIdOutput = setTimeout(function() {
+    // 後でWake Lockを解除する
+    const timeoutIdOutput = setTimeout(function () {
         disableWakeLock();
     }, TimeoutMinutes * 60 * 1000);
-    }
+
     // setTimeoutのIDを返す（後でキャンセルするために必要）
     return timeoutIdOutput;
-  }
+}
   
-// setTimeoutをキャンセルする関数
+/** setTimeoutをキャンセルする関数 */
 function cancelTimeout(timeoutId) {
-    if (checkTimeout()) {
-        clearTimeout(timeoutId);
-        console.log("setTimeoutがキャンセルされました。");
-        return null;
+    //タイムアウトじゃない場合はreturn
+    if (!checkTimeout()) {
+        return timeoutId;
     }
-    return timeoutId;
+
+    clearTimeout(timeoutId);
+    console.log('setTimeoutがキャンセルされました。');
+    return null;
 }
 
-// setTimeoutが動作中かどうかを確認する
-// trueなら実行したい
+/** setTimeoutが動作中かどうかを確認する */
 function checkTimeout() {
-    if (timeoutId) {
-        return true;
-    } else {
-        return false;
-    }
+    return !!timeoutId;
 }
-  
