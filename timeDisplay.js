@@ -78,36 +78,32 @@ function updateSubject() {
     ];
 
     //曜日を取得
-    const weekDays = ['holiday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'holiday'];
-    let dayOfWeek = weekDays[now.getDay()];
-    //現在時間の取得
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let second = now.getSeconds();
+    const dayOfWeek = ['holiday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'holiday'][now.getDay()];
 
     /** 現在時刻（分）*/
-    const nowTime = hours * 60 + minutes;
+    const nowTime = now.getHours() * 60 + now.getMinutes();
 
-    /** 今日の時間割 @type {(string | string[])[]} */
-    let currentSchedule;
-    for (let weekdayCount = 0; weekdayCount < 6; weekdayCount++) {
-        if (dayOfWeek == schedule[weekdayCount][0]) {
-            currentSchedule = schedule[weekdayCount];
-            break;
-        }
-    }
+    /** 今日の時間割 */
+    let currentSchedule = schedule.find(daySchedule => {
+        //曜日から今日のスケジュールかどうか判定する
+        return dayOfWeek === daySchedule[0]
+    });
 
     //入力欄のplaceholderにデフォルト科目名を表示
-    for (let n = 1; n <= 6; n++) {
-        if (Array.isArray(currentSchedule[n + 1])) {
-            let currentSchedule1 = currentSchedule[n + 1][0];
-            let currentSchedule2 = currentSchedule[n + 1][1];
-            document.getElementById('subject-' + n + '-1').placeholder = currentSchedule1;
-            document.getElementById('subject-' + n + '-2').placeholder = currentSchedule2;
+    currentSchedule.forEach((subject, i) => {
+        //コマ数を取得、スケジュールの配列の2つ目からが科目
+        const period = i - 1;
+        //設定にない科目ならreturn
+        if(period < 1 || period > 6) return;
+
+        if (Array.isArray(subject)) {
+            document.getElementById(`subject-${period}-1`).placeholder = subject[0];
+            document.getElementById(`subject-${period}-2`).placeholder = subject[1];
         } else {
-            document.getElementById('subject-' + n + '-1').placeholder = currentSchedule[n + 1];
+            document.getElementById(`subject-${period}-1`).placeholder = subject;
+            //NOTE subject-{period}-2のplaceholderが空欄にならない問題がある
         }
-    }
+    });
 
     //設定されている科目名に変更
     currentSchedule = getSubjectValues(currentSchedule);
@@ -244,7 +240,7 @@ function updateSubject() {
     }
 
     //nowかbeforeで出力内容が変わるので分岐
-    let nowSecond = nowTime * 60 + second;
+    let nowSecond = nowTime * 60 + now.getSeconds();
     if (currentSubject[1] == 'now' && Array.isArray(periodName)) {//授業中で科目名複数の場合
         document.getElementById('leftSubject').innerText =
             periodName[0];
