@@ -17,7 +17,10 @@ let isDebug = false;
 //同じ秒で色変更などの処理が起こるのを防止する用
 let msCount = 1;
 
-//現在時刻取得(通常は空文字列)
+/** 
+ * 現在時刻取得(通常は空文字列) 
+ * @type {Date} 
+ */
 let now = '';
 function updateNow() {
     if (isDebug) {
@@ -50,7 +53,7 @@ function updateSubject() {
     /*
     0→日誌なし
     1→日誌あり
-    2→日誌なし、次回予告あり(例外扱い。個別で分岐を用意する)
+    2→日誌なし、カウントダウンあり(例外扱い。個別で分岐を用意する)
      */
     const timeTable = [
         ['startTime', '9:30', '9:40', 0],
@@ -82,10 +85,10 @@ function updateSubject() {
     let minutes = now.getMinutes();
     let second = now.getSeconds();
 
-    //分単位
+    /** 現在時刻（分）*/
     const nowTime = hours * 60 + minutes;
 
-    //今日の時間割を取得
+    /** 今日の時間割 @type {(string | string[])[]} */
     let currentSchedule;
     for (let weekdayCount = 0; weekdayCount < 6; weekdayCount++) {
         if (dayOfWeek == schedule[weekdayCount][0]) {
@@ -109,6 +112,7 @@ function updateSubject() {
     //設定されている科目名に変更
     currentSchedule = getSubjectValues(currentSchedule);
 
+    //...?
     if (currentSchedule == '') {
         currentSchedule = schedule[5];
     }
@@ -117,38 +121,56 @@ function updateSubject() {
     //現在時刻から今何コマ目か把握
 
     let currentSubject;
+    /** 時間名 @type {string} */
     let currentSubjectStart;
+    /** 時間名 @type {string} */
     let currentSubjectEnd;
 
+    /** 
+     * 今の科目の開始時刻を:で区切った配列  
+     * 後ほど時刻を:でくっつけた文字列になる  
+     * @type {[string, string] | string} 
+     */
     let start;
     for (let i = timeTable.length - 1; i >= 0; i--) {
         start = timeTable[i][1].split(':');
         let startMinutes = parseInt(start[0]) * 60 + parseInt(start[1]);
-        if (nowTime >= startMinutes) {
+        if (nowTime >= startMinutes) { //学校終了後でも放課後と同じ挙動をする
+            //休憩時間の場合は前の科目の開始時刻になる
             currentSubjectStart = timeTable[i][0];
 
             break;
         }
     }
 
+    /** 
+     * startのend版  
+     * 休憩時間の場合は次の科目の終了時刻になる
+     * @type {[string, string] | string}  
+     */
     let end;
     for (let i = 0; i <= timeTable.length; i++) {
         end = timeTable[i][2].split(':');
         let endMinutes = parseInt(end[0]) * 60 + parseInt(end[1]);
+        /** 学校の終了時刻 @type {[string, string]} */
         let afterSchool = timeTable[timeTable.length - 1][2].split(':');
         let afterSchoolMinutes = parseInt(afterSchool[0]) * 60 + parseInt(afterSchool[1]);
 
         if (nowTime == endMinutes && timeTable[i][2] == timeTable[i + 1][1]) {
+            //今が3コマ目終了時刻or昼休憩終了時刻の場合
             currentSubjectEnd = timeTable[i + 1][0];
-            end = afterSchool;
+            end = afterSchool; //学校の終了時刻（['17','00']）にする
             break;
         } else if (nowTime <= endMinutes) {
+            //今の科目の終了時刻が判定できる場合（通常）
             currentSubjectEnd = timeTable[i][0];
             break;
         } else if (nowTime >= afterSchoolMinutes) {
+            //学校終了後の場合
             currentSubjectEnd = timeTable[timeTable.length - 1][0];
             break;
         }
+        //当てはまらない場合はendMinutesを増やす
     }
     start = start.join(':');
     end = end.join(':');
@@ -169,7 +191,9 @@ function updateSubject() {
     currentSubject = currentSubject.split(':');
 
     //曜日から科目名を取り出す。
+    /** 今何コマ目か、昼休みと放課後は文字列になる @type {string | number} */
     let periodNo;
+    /** 今のコマの名前 @type {string | string[]} */
     let periodName;
     switch (currentSubject[0]) {
         case 'startTime':
@@ -211,6 +235,8 @@ function updateSubject() {
     } else {
         periodName = currentSchedule[periodNo];
     }
+
+    //このループは多分使われてない
     for (let i = 0; i < timeTable.length; i++) {
         if (timeTable[i][0] == currentSubject[0]) {
             startSecond = timeTable[i][1].split(':');
@@ -235,6 +261,7 @@ function updateSubject() {
         document.getElementById('rightSubject').innerText =
             '';
     } else {//休憩時間
+        /** 次の科目の開始時刻 @type {[string, string] | number} */
         let startSecond;
         let countdownMessage;
         for (let i = 0; i < timeTable.length; i++) {
@@ -244,7 +271,7 @@ function updateSubject() {
         }
         //分か秒か
         startSecond = startSecond[0] * 3600 + startSecond[1] * 60;
-        if ((startSecond - nowSecond) / 60 > 1) {
+        if ((startSecond - nowSecond) / 60 > 1) { //残り1分を切ったかどうか
             countdownMessage = Math.floor((startSecond - nowSecond) / 60) + '分';
         } else {
             countdownMessage = (startSecond - nowSecond) + '秒';
@@ -287,6 +314,7 @@ function updateSubject() {
 
     //昼休み 次のコマへのカウントダウン表示
     let countdownText = document.getElementById('countdown');
+    /** カウントダウン終了時刻の文字列（`:`が入ってる） @type {string} */
     let countdownEndTime;
     if (currentSubject[0] == 'lunchBreak') {
         for (let i = 0; i <= timeTable.length; i++) {
@@ -309,6 +337,16 @@ function updateSubject() {
 
 setInterval(updateSubject, 250);
 
+/**
+ * 昼休みや放課後のカウントダウンメッセージをHTMLに表示
+ * @param {string} countdownEndTime カウントダウン終了時刻（`:`で区切る）
+ * @param {number} nowTime 現在時刻（分）
+ * @param {number} nowSecond 現在時刻（秒）
+ * @param {(string | string[])[]} currentSchedule その日のスケジュール
+ * @param {HTMLElement} countdownText メッセージを表示させるHTML要素
+ * @param {[string, string]} currentSubject [科目名, 休憩時間かどうか]
+ * @returns 
+ */
 function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject) {
     let countdownMessage;
     let subjectName = currentSchedule[5];
@@ -539,7 +577,11 @@ async function lockEscapeKey() {
 lockEscapeKey();
 
 
-/** 科目名を入力するフォームを取得 */
+/** 
+ * 科目名を入力するフォームを取得  
+ * デフォルトに代入するため引数が必要
+ * @param {(string | string[])[]} defaultSubject 科目のデフォルト値
+ */
 function getSubjectValues(defaultSubject) {
     /** フォームの値を取得 @type {string[][]} */
     const subjectValues = Array(6).fill(Array(2).fill()) //6*2の配列を作成
