@@ -171,64 +171,37 @@ function updateSubject() {
     //下のバー
     progressBarSet(start, end, timeTable);
 
-    //開始時間からの検索結果と終了時間からの検索結果を比較
-    //結果が同じ場合、そのコマの真っ最中。結果が違う場合、それぞれの結果の間が現在時刻。
-    //違う場合に:beforeをつけて休憩時間と認識させる。
-    let currentSubject;
-    if (currentSubjectStart == currentSubjectEnd) {
-        currentSubject = currentSubjectStart + ':now';
-    } else {
-        currentSubject = currentSubjectEnd + ':before';
-    }
-    //出力
-    //:beforeで休憩時間の分岐をする準備
-    currentSubject = currentSubject.split(':');
+    /** 今の科目なら[科目, 'now']、休憩時間なら[次の科目, 'before'] */
+    const currentSubject = 
+    currentSubjectStart === currentSubjectEnd
+    ? [currentSubjectStart, 'now']
+    : [currentSubjectEnd, 'before'];
 
-    //曜日から科目名を取り出す。
-    /** 今何コマ目か、昼休みと放課後は文字列になる @type {string | number} */
-    let periodNo;
-    switch (currentSubject[0]) {
-        case 'startTime':
-            periodNo = 1;
-            break;
-        case 'firstPeriod':
-            periodNo = 2;
-            break;
-        case 'secondPeriod':
-            periodNo = 3;
-            break;
-        case 'thirdPeriod':
-            periodNo = 4;
-            break;
-        case 'lunchBreak':
-            periodNo = 'lunchBreak';
-            break;
-        case 'fourthPeriod':
-            periodNo = 5;
-            break;
-        case 'fifthPeriod':
-            periodNo = 6;
-            break;
-        case 'sixthPeriod':
-            periodNo = 7;
-            break;
-        case 'endTime':
-            periodNo = 8;
-            break;
-        case 'afterSchool':
-            periodNo = 'afterSchool';
-            break;
-    }
+    //曜日から科目名を取り出す
+
+    /** 
+     * コマ数の文字列とコマ数の数値を紐づけるMap  
+     * 昼休みや放課後などコマ数がない場合は、コマ名の文字列を入れる
+     */
+    const periodNoMap = new Map([
+        ['startTime', {data: 1, isNo: true}],
+        ['firstPeriod', {data: 2, isNo: true}],
+        ['secondPeriod', {data: 3, isNo: true}],
+        ['thirdPeriod', {data: 4, isNo: true}],
+        ['lunchBreak', {data: '昼休み', isNo: false}],
+        ['fourthPeriod', {data: 5, isNo: true}],
+        ['fifthPeriod', {data: 6, isNo: true}],
+        ['sixthPeriod', {data: 7, isNo: true}],
+        ['endTime', {data: 8, isNo: true}],
+        ['afterSchool', {data: '放課後', isNo: false}]
+    ]);
+    const periodNoData = periodNoMap.get(currentSubject[0]);
 
     /** 今のコマの名前 @type {string | string[]} */
-    let periodName;
-    if (periodNo == 'lunchBreak') {
-        periodName = '昼休み';
-    } else if (periodNo == 'afterSchool') {
-        periodName = '放課後';
-    } else {
-        periodName = currentSchedule[periodNo];
-    }
+    let periodName = 
+    periodNoData.isNo
+    ? currentSchedule[periodNoData.data]
+    : periodNoData.data;
 
     //このループは多分使われてない
     for (let i = 0; i < timeTable.length; i++) {
