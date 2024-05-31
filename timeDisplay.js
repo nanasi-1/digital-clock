@@ -115,59 +115,56 @@ function updateSubject() {
 
 
     //現在時刻から今何コマ目か把握
-
-    let currentSubject;
-    /** 時間名 @type {string} */
     let currentSubjectStart;
-    /** 時間名 @type {string} */
-    let currentSubjectEnd;
-
     /** 
-     * 今の科目の開始時刻を:で区切った配列  
+     * 今の科目の開始時刻を:で区切った配列（休憩時間の場合は前の科目の開始時刻）  
      * 後ほど時刻を:でくっつけた文字列になる  
      * @type {[string, string] | string} 
      */
-    let start;
-    for (let i = timeTable.length - 1; i >= 0; i--) {
-        start = timeTable[i][1].split(':');
-        let startMinutes = parseInt(start[0]) * 60 + parseInt(start[1]);
-        if (nowTime >= startMinutes) { //学校終了後でも放課後と同じ挙動をする
-            //休憩時間の場合は前の科目の開始時刻になる
-            currentSubjectStart = timeTable[i][0];
+    let start = timeTable[0][1].split(':'); //何も代入されない時の保険
+    for (const row of timeTable.toReversed()) {
+        const timeArray = row[1].split(':');
+        const startMinutes = parseInt(timeArray[0]) * 60 + parseInt(timeArray[1]);
+        if (nowTime < startMinutes) continue;
 
-            break;
-        }
+        start = timeArray;
+        currentSubjectStart = row[0];
+        //学校終了後でも放課後と同じものが代入される
+        break;
     }
-
+    
+    let currentSubjectEnd;
     /** 
-     * startのend版  
-     * 休憩時間の場合は次の科目の終了時刻になる
+     * startのend版（休憩時間の場合は次の科目の終了時刻になる）
      * @type {[string, string] | string}  
      */
-    let end;
-    for (let i = 0; i <= timeTable.length; i++) {
-        end = timeTable[i][2].split(':');
-        let endMinutes = parseInt(end[0]) * 60 + parseInt(end[1]);
-        /** 学校の終了時刻 @type {[string, string]} */
-        let afterSchool = timeTable[timeTable.length - 1][2].split(':');
-        let afterSchoolMinutes = parseInt(afterSchool[0]) * 60 + parseInt(afterSchool[1]);
+    let end = timeTable.at(-1)[2].split(':'); //一応念の為、一番最後の科目の終了時刻で初期化
 
-        if (nowTime == endMinutes && timeTable[i][2] == timeTable[i + 1][1]) {
-            //今が3コマ目終了時刻or昼休憩終了時刻の場合
-            currentSubjectEnd = timeTable[i + 1][0];
-            end = afterSchool; //学校の終了時刻（['17','00']）にする
-            break;
-        } else if (nowTime <= endMinutes) {
-            //今の科目の終了時刻が判定できる場合（通常）
-            currentSubjectEnd = timeTable[i][0];
-            break;
-        } else if (nowTime >= afterSchoolMinutes) {
-            //学校終了後の場合
-            currentSubjectEnd = timeTable[timeTable.length - 1][0];
-            break;
+    /** 学校の終了時刻 @type {[string, string]} */
+    const afterSchool = timeTable[timeTable.length - 1][2].split(':');
+    const afterSchoolMinutes = parseInt(afterSchool[0]) * 60 + parseInt(afterSchool[1]);
+
+    if (nowTime >= afterSchoolMinutes) { //学校終了後の場合
+        const afterSchoolRow = timeTable[timeTable.length - 1];
+        currentSubjectEnd = afterSchoolRow[0];
+        end = afterSchoolRow[2].split(':');
+    } else {
+        for (const [i, row] of timeTable.entries()) {
+            const timeArray = row[2].split(':');
+            const endMinutes = parseInt(timeArray[0]) * 60 + parseInt(timeArray[1]);
+    
+            if (nowTime === endMinutes && row[2] === timeTable[i + 1][1]) { //今が3コマ目終了時刻or昼休憩終了時刻の場合
+                currentSubjectEnd = timeTable[i + 1][0];
+                end = afterSchool; //学校の終了時刻にする仕様
+                break;
+            } else if (nowTime <= endMinutes) { //今の科目の終了時刻が判定できる場合（通常）
+                currentSubjectEnd = row[0];
+                end = timeArray;
+                break;
+            }
         }
-        //当てはまらない場合はendMinutesを増やす
     }
+
     start = start.join(':');
     end = end.join(':');
 
@@ -177,6 +174,7 @@ function updateSubject() {
     //開始時間からの検索結果と終了時間からの検索結果を比較
     //結果が同じ場合、そのコマの真っ最中。結果が違う場合、それぞれの結果の間が現在時刻。
     //違う場合に:beforeをつけて休憩時間と認識させる。
+    let currentSubject;
     if (currentSubjectStart == currentSubjectEnd) {
         currentSubject = currentSubjectStart + ':now';
     } else {
@@ -189,8 +187,6 @@ function updateSubject() {
     //曜日から科目名を取り出す。
     /** 今何コマ目か、昼休みと放課後は文字列になる @type {string | number} */
     let periodNo;
-    /** 今のコマの名前 @type {string | string[]} */
-    let periodName;
     switch (currentSubject[0]) {
         case 'startTime':
             periodNo = 1;
@@ -224,6 +220,8 @@ function updateSubject() {
             break;
     }
 
+    /** 今のコマの名前 @type {string | string[]} */
+    let periodName;
     if (periodNo == 'lunchBreak') {
         periodName = '昼休み';
     } else if (periodNo == 'afterSchool') {
