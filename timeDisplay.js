@@ -38,6 +38,9 @@ function updateNow() {
         `${now.toLocaleDateString()}(${dayOfWeek})`;
     document.getElementById('time').innerText = //時刻
         now.toLocaleTimeString();
+
+    //科目を更新
+    updateSubject()
     
     //色変更(15分ごとに)
     if (now.getSeconds() === 0 && now.getMinutes() % 15 === 0 && msCount % 4 === 0) {
@@ -245,11 +248,12 @@ function updateSubject() {
         document.getElementById('subject').innerText = `${displayPeriodName}まで あと${countdownMessage}`;
     }
 
-    //メッセージを表示
+    //日誌メッセージを表示
+    //メッセージを表示する要素
     const diaryText = document.getElementById('diaryMessage');
     //日誌時間が必要か否か
     let needDiary = 0;
-    //日誌開始時間を格納
+    //日誌開始時間
     let diaryStartTime;
     for (let i = 0; i < timeTable.length; i++) {
         if (currentSubject[0] == timeTable[i][0]) {
@@ -258,44 +262,38 @@ function updateSubject() {
             break;
         }
     }
-
     diaryStartTime =
         parseInt(diaryStartTime.split(':')[0]) * 60 +
         parseInt(diaryStartTime.split(':')[1]);
-    //日誌メッセージを表示
-    let diaryMessage = '残り{n分}になりました。日誌を記入しましょう！';
-    //変数にはそのコマの終了時刻を格納。現在時刻との差が5分になるとメッセージを表示
-    if (diaryStartTime - nowTime <= 5 && needDiary == 1) {//メッセージ表示
-        diaryMessage = diaryMessage.replace('{n分}', '5分');
+
+    //現在時刻との差が5分になると日誌メッセージを表示
+    if (diaryStartTime - nowTime <= 5 && needDiary === 1) {//メッセージ表示
+        const diaryMessage = '残り5分になりました。日誌を記入しましょう！';
         diaryText.innerText = diaryMessage;
     } else {//日誌時間外のメッセージ削除
         diaryText.innerText = '';
     }
 
     //昼休み 次のコマへのカウントダウン表示
-    let countdownText = document.getElementById('countdown');
-    /** カウントダウン終了時刻の文字列（`:`が入ってる） @type {string} */
-    let countdownEndTime;
-    if (currentSubject[0] == 'lunchBreak') {
-        for (let i = 0; i <= timeTable.length; i++) {
-            if (timeTable[i][0] == currentSubject[0]) {
-                countdownEndTime = timeTable[i + 1][1];
-                break;
-            }
-        }
+    const countdownText = document.getElementById('countdown');
+    if (currentSubject[0] === 'lunchBreak') {
+        //カウントダウン終了時刻の文字列
+        const countdownEndTime = timeTable[
+            //現在の科目から終了時刻の時間割を見つける
+            timeTable.findIndex(row => row[0] === currentSubject[0])
+        ][2];
 
         countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject);
     } else {
         countdownText.innerText = '';
     }
+
     //放課後のこり10分になったらカウントダウン（忘れてそう）<-忘れてた
-    if (currentSubject[0] == 'afterSchool') {
-        countdownEndTime = timeTable[timeTable.length - 1][2];
+    if (currentSubject[0] === 'afterSchool') {
+        const countdownEndTime = timeTable[timeTable.length - 1][2];
         countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject)
     }
 }
-
-setInterval(updateSubject, 250);
 
 /**
  * 昼休みや放課後のカウントダウンメッセージをHTMLに表示
@@ -305,7 +303,6 @@ setInterval(updateSubject, 250);
  * @param {(string | string[])[]} currentSchedule その日のスケジュール
  * @param {HTMLElement} countdownText メッセージを表示させるHTML要素
  * @param {[string, string]} currentSubject [科目名, 休憩時間かどうか]
- * @returns 
  */
 function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject) {
     let countdownMessage;
