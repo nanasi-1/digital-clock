@@ -135,7 +135,7 @@ function updateSubject() {
     
     let currentSubjectEnd;
     /** 
-     * startのend版（休憩時間の場合は次の科目の終了時刻になる）
+     * startのend版（休憩時間の場合は次の科目の終了時刻）
      * @type {[string, string] | string}  
      */
     let end = timeTable.at(-1)[2].split(':'); //一応念の為、一番最後の科目の終了時刻で初期化
@@ -153,13 +153,15 @@ function updateSubject() {
             const timeArray = row[2].split(':');
             const endMinutes = parseInt(timeArray[0]) * 60 + parseInt(timeArray[1]);
     
-            if (nowTime === endMinutes && row[2] === timeTable[i + 1][1]) { //今が3コマ目終了時刻or昼休憩終了時刻の場合
+            if (nowTime === endMinutes && row[2] === timeTable[i + 1][1]) {
+                //今が3コマ目終了時刻or昼休憩終了時刻の場合
                 currentSubjectEnd = timeTable[i + 1][0];
                 end = afterSchool; //学校の終了時刻にする仕様
                 break;
-            } else if (nowTime <= endMinutes) { //今の科目の終了時刻が判定できる場合（通常）
-                currentSubjectEnd = row[0];
-                end = timeArray;
+            } else if (nowTime <= endMinutes) {
+                //今の科目の終了時刻が判定できる場合（通常）
+                currentSubjectEnd = row[0]; //休憩時間なら次の科目
+                end = timeArray; //休憩時間なら次の科目の終了時刻
                 break;
             }
         }
@@ -177,7 +179,7 @@ function updateSubject() {
     ? [currentSubjectStart, 'now']
     : [currentSubjectEnd, 'before'];
 
-    //曜日から科目名を取り出す
+    //科目名を取得する
 
     /** 
      * コマ数の文字列とコマ数の数値を紐づけるMap  
@@ -203,53 +205,44 @@ function updateSubject() {
     ? currentSchedule[periodNoData.data]
     : periodNoData.data;
 
-    //このループは多分使われてない
-    for (let i = 0; i < timeTable.length; i++) {
-        if (timeTable[i][0] == currentSubject[0]) {
-            startSecond = timeTable[i][1].split(':');
-        }
-    }
-
     //nowかbeforeで出力内容が変わるので分岐
     let nowSecond = nowTime * 60 + now.getSeconds();
-    if (currentSubject[1] == 'now' && Array.isArray(periodName)) {//授業中で科目名複数の場合
-        document.getElementById('leftSubject').innerText =
-            periodName[0];
-        document.getElementById('rightSubject').innerText =
-            periodName[1];
-        document.getElementById('subject').innerText =
-            '';
-
-    } else if (currentSubject[1] == 'now') {//授業中で科目名単数
-        document.getElementById('subject').innerText =
-            periodName
-        document.getElementById('leftSubject').innerText =
-            '';
-        document.getElementById('rightSubject').innerText =
-            '';
-    } else {//休憩時間
-        /** 次の科目の開始時刻 @type {[string, string] | number} */
+    if (currentSubject[1] == 'now' && Array.isArray(periodName)) {
+        //授業中で科目名複数の場合
+        document.getElementById('leftSubject').innerText = periodName[0];
+        document.getElementById('rightSubject').innerText = periodName[1];
+        document.getElementById('subject').innerText = '';
+    } else if (currentSubject[1] == 'now') {
+        //授業中で科目名単数の場合
+        document.getElementById('subject').innerText = periodName;
+        document.getElementById('leftSubject').innerText = '';
+        document.getElementById('rightSubject').innerText = '';
+    } else {
+        //休憩時間の場合
+        //タイムテーブルの中から今の科目を抜き出す
         let startSecond;
-        let countdownMessage;
-        for (let i = 0; i < timeTable.length; i++) {
-            if (timeTable[i][0] == currentSubject[0]) {
-                startSecond = timeTable[i][1].split(':');
-            }
-        }
-        //分か秒か
-        startSecond = startSecond[0] * 3600 + startSecond[1] * 60;
-        if ((startSecond - nowSecond) / 60 > 1) { //残り1分を切ったかどうか
-            countdownMessage = Math.floor((startSecond - nowSecond) / 60) + '分';
-        } else {
-            countdownMessage = (startSecond - nowSecond) + '秒';
-        }
+        timeTable.forEach(row => {
+            if (row[0] !== currentSubject[0]) return;
 
-        //複数ある場合に「〇〇と□□」に
-        if (Array.isArray(periodName)) {
-            periodName = periodName.join('と');
-        }
-        document.getElementById('subject').innerText =
-            periodName + 'まで あと' + countdownMessage;
+            //次の科目の開始時刻を計算する
+            const [startMin, startSec] = row[1].split(':');
+            startSecond = startMin * 3600 + startSec * 60; 
+            //↑string * numberは正常に計算できるので問題なし
+        });
+
+        //残り時間の文字列
+        const countdownMessage = 
+        (startSecond - nowSecond) / 60 > 1 //残り1分を切ったかどうか
+        ? Math.floor((startSecond - nowSecond) / 60) + '分'
+        : (startSecond - nowSecond) + '秒';
+
+        //科目が複数ある場合は「〇〇と□□」に
+        const displayPeriodName = 
+        Array.isArray(periodName)
+        ? periodName.join('と')
+        : periodName;
+
+        document.getElementById('subject').innerText = `${displayPeriodName}まで あと${countdownMessage}`;
     }
 
     //メッセージを表示
