@@ -249,22 +249,25 @@ function updateSubject() {
     }
 
     //日誌メッセージを表示
+
     //メッセージを表示する要素
     const diaryText = document.getElementById('diaryMessage');
     //日誌時間が必要か否か
     let needDiary = 0;
     //日誌開始時間
     let diaryStartTime;
-    for (let i = 0; i < timeTable.length; i++) {
-        if (currentSubject[0] == timeTable[i][0]) {
-            needDiary = timeTable[i][3];
-            diaryStartTime = timeTable[i][2];
-            break;
-        }
+
+    //needDiaryとdiaryStartTimeを初期化
+    for (const row of timeTable) {
+        if (currentSubject[0] !== row[0]) continue;
+        
+        needDiary = row[3];
+        const startTimeArray = row[2].split(':');
+        diaryStartTime = 
+            parseInt(startTimeArray[0]) * 60 +
+            parseInt(startTimeArray[1]);;
+        break;
     }
-    diaryStartTime =
-        parseInt(diaryStartTime.split(':')[0]) * 60 +
-        parseInt(diaryStartTime.split(':')[1]);
 
     //現在時刻との差が5分になると日誌メッセージを表示
     if (diaryStartTime - nowTime <= 5 && needDiary === 1) {//メッセージ表示
