@@ -176,7 +176,7 @@ function updateSubject() {
     //下のバー
     progressBarSet(start, end, timeTable);
 
-    /** 今の科目なら[科目, 'now']、休憩時間なら[次の科目, 'before'] */
+    /** 今の科目なら[科目（例:thirdPeriod）, 'now']、休憩時間なら[次の科目, 'before'] */
     const currentSubject = 
     currentSubjectStart === currentSubjectEnd
     ? [currentSubjectStart, 'now']
@@ -277,57 +277,72 @@ function updateSubject() {
         diaryText.innerText = '';
     }
 
-    //昼休み 次のコマへのカウントダウン表示
     const countdownText = document.getElementById('countdown');
-    if (currentSubject[0] === 'lunchBreak') {
-        //カウントダウン終了時刻の文字列
-        const countdownEndTime = timeTable[
-            //現在の科目から終了時刻の時間割を見つける
+    if (currentSubject[0] === 'lunchBreak') {//昼休みなら次のコマへのカウントダウンを表示
+        //現在の科目（=昼休み）の終了時刻を取得
+        const endTimeArray = timeTable[
             timeTable.findIndex(row => row[0] === currentSubject[0])
-        ][2];
+        ][2].split(':');
+        const endSecond = parseInt(endTimeArray[0]) * 3600 + parseInt(endTimeArray[1]) * 60;
 
-        countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject);
+        //次の科目名を取得
+        const nextSubjectName = currentSchedule[5];
+
+        //HTMLにカウントダウンメッセージを表示
+        countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubjectName);
+    } else if (currentSubject[0] === 'afterSchool') {//放課後のこり10分ならカウントダウンを表示
+        //学校終了時刻を取得
+        const endTimeArray = timeTable[timeTable.length - 1][2].split(':');
+        const endSecond = parseInt(endTimeArray[0]) * 3600 + parseInt(endTimeArray[1]) * 60;
+
+        //残り10分以上ある場合はreturn
+        if(endSecond - nowSecond > 10 * 60) {
+            countdownText.innerText = '';
+            return;
+        }
+
+        //次の科目=放課後終了の表示名を設定
+        const nextSubjectName = '放課後 終了';
+
+        //HTMLにメッセージを表示
+        countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubjectName)
     } else {
         countdownText.innerText = '';
-    }
-
-    //放課後のこり10分になったらカウントダウン（忘れてそう）<-忘れてた
-    if (currentSubject[0] === 'afterSchool') {
-        const countdownEndTime = timeTable[timeTable.length - 1][2];
-        countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject)
     }
 }
 
 /**
  * 昼休みや放課後のカウントダウンメッセージをHTMLに表示
- * @param {string} countdownEndTime カウントダウン終了時刻（`:`で区切る）
- * @param {number} nowTime 現在時刻（分）
+ * @param {number} endSecond カウントダウン終了時刻（秒）
  * @param {number} nowSecond 現在時刻（秒）
- * @param {(string | string[])[]} currentSchedule その日のスケジュール
  * @param {HTMLElement} countdownText メッセージを表示させるHTML要素
- * @param {[string, string]} currentSubject [科目名, 休憩時間かどうか]
+ * @param {string} nextSubjectName カウントダウンメッセージに表示する科目名（複数あれば配列）
  */
-function countdownMessageOutput(countdownEndTime, nowTime, nowSecond, currentSchedule, countdownText, currentSubject) {
+function countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubjectName) {
+    //終了時刻を過ぎている場合（放課後で学校終了時刻を過ぎている場合）
+    if (endSecond <= nowSecond) {
+        countdownText.innerText = '';
+        return;
+    }
+    
+    //配列の場合は繋げる
+    const nextSubjectString = 
+    Array.isArray(nextSubjectName)
+    ? nextSubjectName.join('と')
+    : nextSubjectName;
+
     let countdownMessage;
-    let subjectName = currentSchedule[5];
+    if (endSecond - nowSecond > 60) {//通常
+        const endMinutes = Math.floor(endSecond / 60);
+        const nowMinutes = Math.floor(nowSecond / 60);
 
-    countdownEndTime = countdownEndTime.split(':');
-    countdownEndTime = parseInt(countdownEndTime[0]) * 60 + parseInt(countdownEndTime[1]);
-    if (currentSubject[0] == 'afterSchool' && countdownEndTime - nowTime > 10 || countdownEndTime <= nowTime) {
-        return 0;
-    } else if (currentSubject[0] == 'afterSchool') {
-        subjectName = '放課後 終了';
-    } else if (Array.isArray(currentSchedule[5])) {//複数の場合
-        subjectName = currentSchedule[5].join('と');
-    }
-    if (countdownEndTime - nowTime > 1) {//通常
         //休憩時間のカウントダウンが切り捨てのため、辻褄合わせの-1
-        countdownMessage = (countdownEndTime - nowTime - 1) + '分';
-    } else {//1分未満
-        countdownMessage = (countdownEndTime * 60 - nowSecond) + '秒';
+        countdownMessage = (endMinutes - nowMinutes - 1) + '分';
+    } else {//1分（60秒）未満
+        countdownMessage = (endSecond - nowSecond) + '秒';
     }
 
-    countdownText.innerText = subjectName + 'まで あと' + countdownMessage;
+    countdownText.innerText = `${nextSubjectString}まで あと${countdownMessage}`;
 }
 
 //背景パターン
