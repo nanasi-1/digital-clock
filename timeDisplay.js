@@ -87,13 +87,13 @@ function updateSubject() {
     const nowTime = now.getHours() * 60 + now.getMinutes();
 
     /** 今日の時間割 */
-    let currentSchedule = schedule.find(daySchedule => {
+    const currentScheduleDefault = schedule.find(daySchedule => {
         //曜日から今日のスケジュールかどうか判定する
         return dayOfWeek === daySchedule[0]
     });
 
     //入力欄のplaceholderにデフォルト科目名を表示
-    currentSchedule.forEach((subject, i) => {
+    currentScheduleDefault.forEach((subject, i) => {
         //コマ数を取得、スケジュールの配列の2つ目からが科目
         const period = i - 1;
         //設定にない科目ならreturn
@@ -109,7 +109,7 @@ function updateSubject() {
     });
 
     //設定されている科目名に変更
-    currentSchedule = getSubjectValues(currentSchedule);
+    const currentSchedule = getSubjectValues(currentScheduleDefault);
 
     //...?
     if (currentSchedule == '') {
@@ -203,7 +203,7 @@ function updateSubject() {
     const periodNoData = periodNoMap.get(currentSubject[0]);
 
     /** 今のコマの名前 @type {string | string[]} */
-    let periodName = 
+    const periodName = 
     periodNoData.isNo
     ? currentSchedule[periodNoData.data]
     : periodNoData.data;
@@ -344,6 +344,7 @@ function countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubject
 
     countdownText.innerText = `${nextSubjectString}まで あと${countdownMessage}`;
 }
+//NOTE 2つ目の科目のみを設定した場合デフォルト科目がjoinされないバグあり
 
 //背景パターン
 const backgroundColorCode = [
@@ -403,73 +404,48 @@ async function colorChange() {
 /** 
  * 天気情報に応じて背景と文字の色のクロスフェードを行う。  
  * 色のデバッグならこちら推奨。
- * @param {'Clear' | 'Cloudy' | 'Rainy'} pattern 天気の文字列
+ * @param {'Clear' | 'Cloudy' | 'Rainy'} weather 天気の文字列
+ * @param {'morning' | 'afternoon' | 'evening' | 'night' | undefined} time 時間帯（通常は自動計算）
  */
-function crossFadeColors(pattern) {
-    //patter -> Clear-morning
-    if (pattern.includes('-') == false) {
-        pattern[0] = pattern;
-        const hour = now.getHours();
+function crossFadeColors(weather, time) {
+    //時間から時間帯を計算
+    const hour = now.getHours();
+    const timeOfDay = time ? time
+    : hour >= 5 && hour < 10 ? 'morning' //朝
+    : hour >= 10 && hour < 16 ? 'afternoon' //昼
+    : hour >= 16 && hour < 20 ? 'evening' //夕方
+    : 'night'; //夜
 
-        if (hour >= 5 && hour < 10) {//朝
-            pattern = pattern + '-morning';
-        } else if (hour >= 10 && hour < 16) {//昼
-            pattern = pattern + '-afternoon';
-        } else if (hour >= 16 && hour < 20) {//夕方
-            pattern = pattern + '-evening';
-        } else {//夜
-            pattern = pattern + '-night';
-        }
-        console.log(pattern);
-    }
-    pattern = pattern.split('-');
-    const body = document.body;
-    const transitionTime = 2;
+    //天気-時間帯 で出力
+    console.log(`${weather}-${timeOfDay}`);
 
-    let colorCodeNo = [];
+    //色を取得
+    const weatherIndex = backgroundColorCode[0].indexOf(weather);
+    const timeOfDayIndex = backgroundColorCode.map(row => row[0]).indexOf(timeOfDay);
+    const bgColor = backgroundColorCode[timeOfDayIndex][weatherIndex];
+    const textColor = textColorCode[timeOfDayIndex][weatherIndex];
 
-    for (let y = 1; y < backgroundColorCode.length; y++) {
-        for (let x = 1; x < backgroundColorCode[y].length; x++) {
-            if (pattern[0] == backgroundColorCode[0][x] && pattern[1] == backgroundColorCode[y][0]) {
-                colorCodeNo[0] = y;
-                colorCodeNo[1] = x;
-            }
-        }
-    }
+    //背景色を更新
+    document.body.style.backgroundColor = bgColor;
 
-    const bgColor = backgroundColorCode[colorCodeNo[0]][colorCodeNo[1]];
-    const textColor = textColorCode[colorCodeNo[0]][colorCodeNo[1]];
+    //画面の文字の色を更新
+    document.querySelector('.display').style.color = textColor;
 
-    body.style.transition = `background-color ${transitionTime}s ease`;
-    body.style.backgroundColor = bgColor;
-
-
-    const textElements = document.querySelectorAll("div, h1, h2, span, a");
-    textElements.forEach((element) => {
-        if (!element.classList.contains("overlay")) {
-            element.style.transition = `color ${transitionTime}s ease`;
-            element.style.color = textColor;
-        }
-
-        const spanElements = document.querySelectorAll("span");
-        spanElements.forEach((span) => {
-            span.style.transition = `background-color ${transitionTime}s ease`;
-            span.style.backgroundColor = textColor;
-        });
+    const spanElements = document.querySelectorAll('.ef ~ .focus_line, .fullScreenBtn span, .openBtn span');
+    spanElements.forEach((span) => {
+        span.style.backgroundColor = textColor;
     });
 
     //バーの色設定
-    const bgColorRGB = {
-        R: parseInt(bgColor.slice(1, 3), 16),
-        G: parseInt(bgColor.slice(3, 5), 16),
-        B: parseInt(bgColor.slice(5, 7), 16)
-    }
-
+    const bgColorRGB = [
+        parseInt(bgColor.slice(1, 3), 16),
+        parseInt(bgColor.slice(3, 5), 16),
+        parseInt(bgColor.slice(5, 7), 16)
+    ];
+    const max = Math.max(bgColorRGB);
+    const min = Math.min(bgColorRGB);
+    
     const progressBar = document.querySelector('.progress-bar-inner');
-
-    const max = Math.max(...Object.values(bgColorRGB));
-    const min = Math.min(...Object.values(bgColorRGB));
-
     if ((max + min) / 2 <= 127.5) {//背景が暗い
         progressBar.style.backgroundColor = 'rgba(255, 255, 255, 80%)';
     } else {//背景が明るい
@@ -478,13 +454,14 @@ function crossFadeColors(pattern) {
 }
 
 //設定開閉ボタン
+//NOTE リロード時にこのボタンを押すまで設定した科目が反映されないバグあり
 document.querySelector(".openBtn").addEventListener('click', (e) => {
     /** 設定開閉ボタン @type {HTMLButtonElement} */
     const btn = e.target.nodeName === 'DIV' ? e.target : e.target.parentElement
     //↑spanタグでイベントが発火するバグがあるため、spanの場合は親要素を取得
 
     //設定が開かれているかどうか
-    const isOpen = btn.dataset['isOpen'] === 'true'
+    const isOpen = btn.dataset['isOpen'] === 'true';
 
     //見た目の切り替え
     btn.classList.toggle('active');
