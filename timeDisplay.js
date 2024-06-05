@@ -4,10 +4,10 @@ window.addEventListener('DOMContentLoaded', () => {
     colorChange();
     
     //リンクから開いた時、ローカルストレージを削除
-    const type = performance.getEntriesByType('navigation')[0]?.type;
-    if (type === 'navigate' || type === 'back_forward') { // 挙動を揃えるためback_forwardも入れてる
-        localStorage.clear();
-    }
+    if (shouldClearStorage()) localStorage.clear();
+
+    //escキーをロック
+    lockEscapeKey();
 })
 
 //デバック用
@@ -18,7 +18,7 @@ let isDebug = false;
 let msCount = 1;
 
 /** 
- * 現在時刻取得(通常は空文字列) 
+ * 現在時刻（文字列を入れるとDateになる）
  * @type {Date} 
  */
 let now = '';
@@ -58,7 +58,7 @@ function updateSubject() {
     1→日誌あり
     2→日誌なし、カウントダウンあり(例外扱い。個別で分岐を用意する)
      */
-    const timeTable = [
+    const TIME_TABLE = [
         ['startTime', '9:30', '9:40', 0],
         ['firstPeriod', '9:45', '10:35', 1],
         ['secondPeriod', '10:45', '11:35', 1],
@@ -70,7 +70,7 @@ function updateSubject() {
         ['endTime', '16:05', '16:20', 0],
         ['afterSchool', '16:20', '17:00', 2],
     ];
-    const schedule = [
+    const SCHEDULE = [
         //0.曜日        1.はじまりの会  2.1コマ目  3.2コマ目　4.3コマ目                   5.4コマ目   6.5コマ目       7.6コマ目   8.おわりの会
         ['Monday', 'はじまりの会', 'PBL', 'PBL', ['基礎学習', '上級英語'], '基礎学習', 'プログラミング', '自由選択', 'おわりの会'],
         ['Tuesday', 'はじまりの会', 'PBL', 'PBL', '基礎学習', '基礎学習', 'プログラミング', '自由選択', 'おわりの会'],
@@ -87,7 +87,7 @@ function updateSubject() {
     const nowTime = now.getHours() * 60 + now.getMinutes();
 
     /** 今日の時間割 */
-    const currentScheduleDefault = schedule.find(daySchedule => {
+    const currentScheduleDefault = SCHEDULE.find(daySchedule => {
         //曜日から今日のスケジュールかどうか判定する
         return dayOfWeek === daySchedule[0]
     });
@@ -113,7 +113,7 @@ function updateSubject() {
 
     //...?
     if (currentSchedule == '') {
-        currentSchedule = schedule[5];
+        currentSchedule = SCHEDULE[5];
     }
 
 
@@ -124,8 +124,8 @@ function updateSubject() {
      * 後ほど時刻を:でくっつけた文字列になる  
      * @type {[string, string] | string} 
      */
-    let start = timeTable[0][1].split(':'); //何も代入されない時の保険
-    for (const row of timeTable.toReversed()) {
+    let start = TIME_TABLE[0][1].split(':'); //何も代入されない時の保険
+    for (const row of TIME_TABLE.toReversed()) {
         const timeArray = row[1].split(':');
         const startMinutes = parseInt(timeArray[0]) * 60 + parseInt(timeArray[1]);
         if (nowTime < startMinutes) continue;
@@ -141,24 +141,24 @@ function updateSubject() {
      * startのend版（休憩時間の場合は次の科目の終了時刻）
      * @type {[string, string] | string}  
      */
-    let end = timeTable.at(-1)[2].split(':'); //一応念の為、一番最後の科目の終了時刻で初期化
+    let end = TIME_TABLE.at(-1)[2].split(':'); //一応念の為、一番最後の科目の終了時刻で初期化
 
     /** 学校の終了時刻 @type {[string, string]} */
-    const afterSchool = timeTable[timeTable.length - 1][2].split(':');
+    const afterSchool = TIME_TABLE[TIME_TABLE.length - 1][2].split(':');
     const afterSchoolMinutes = parseInt(afterSchool[0]) * 60 + parseInt(afterSchool[1]);
 
     if (nowTime >= afterSchoolMinutes) { //学校終了後の場合
-        const afterSchoolRow = timeTable[timeTable.length - 1];
+        const afterSchoolRow = TIME_TABLE[TIME_TABLE.length - 1];
         currentSubjectEnd = afterSchoolRow[0];
         end = afterSchoolRow[2].split(':');
     } else {
-        for (const [i, row] of timeTable.entries()) {
+        for (const [i, row] of TIME_TABLE.entries()) {
             const timeArray = row[2].split(':');
             const endMinutes = parseInt(timeArray[0]) * 60 + parseInt(timeArray[1]);
     
-            if (nowTime === endMinutes && row[2] === timeTable[i + 1][1]) {
+            if (nowTime === endMinutes && row[2] === TIME_TABLE[i + 1][1]) {
                 //今が3コマ目終了時刻or昼休憩終了時刻の場合
-                currentSubjectEnd = timeTable[i + 1][0];
+                currentSubjectEnd = TIME_TABLE[i + 1][0];
                 end = afterSchool; //学校の終了時刻にする仕様
                 break;
             } else if (nowTime <= endMinutes) {
@@ -174,7 +174,7 @@ function updateSubject() {
     end = end.join(':');
 
     //下のバー
-    progressBarSet(start, end, timeTable);
+    progressBarSet(start, end, TIME_TABLE);
 
     /** 今の科目なら[科目（例:thirdPeriod）, 'now']、休憩時間なら[次の科目, 'before'] */
     const currentSubject = 
@@ -224,7 +224,7 @@ function updateSubject() {
         //休憩時間の場合
         //タイムテーブルの中から今の科目を抜き出す
         let startSecond;
-        timeTable.forEach(row => {
+        TIME_TABLE.forEach(row => {
             if (row[0] !== currentSubject[0]) return;
 
             //次の科目の開始時刻を計算する
@@ -258,7 +258,7 @@ function updateSubject() {
     let diaryStartTime;
 
     //needDiaryとdiaryStartTimeを初期化
-    for (const row of timeTable) {
+    for (const row of TIME_TABLE) {
         if (currentSubject[0] !== row[0]) continue;
         
         needDiary = row[3];
@@ -280,8 +280,8 @@ function updateSubject() {
     const countdownText = document.getElementById('countdown');
     if (currentSubject[0] === 'lunchBreak') {//昼休みなら次のコマへのカウントダウンを表示
         //現在の科目（=昼休み）の終了時刻を取得
-        const endTimeArray = timeTable[
-            timeTable.findIndex(row => row[0] === currentSubject[0])
+        const endTimeArray = TIME_TABLE[
+            TIME_TABLE.findIndex(row => row[0] === currentSubject[0])
         ][2].split(':');
         const endSecond = parseInt(endTimeArray[0]) * 3600 + parseInt(endTimeArray[1]) * 60;
 
@@ -292,7 +292,7 @@ function updateSubject() {
         countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubjectName);
     } else if (currentSubject[0] === 'afterSchool') {//放課後のこり10分ならカウントダウンを表示
         //学校終了時刻を取得
-        const endTimeArray = timeTable[timeTable.length - 1][2].split(':');
+        const endTimeArray = TIME_TABLE[TIME_TABLE.length - 1][2].split(':');
         const endSecond = parseInt(endTimeArray[0]) * 3600 + parseInt(endTimeArray[1]) * 60;
 
         //残り10分以上ある場合はreturn
@@ -347,7 +347,7 @@ function countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubject
 //NOTE 2つ目の科目のみを設定した場合デフォルト科目がjoinされないバグあり
 
 //背景パターン
-const backgroundColorCode = [
+const BACKGROUND_COLOR_CODE = [
     ['weather', 'Clear', 'Cloudy', 'Rainy'],
     ['morning', '#87CEEB', '#ffffff', '#b4dbf5'],
     ['afternoon', '#00BFFF', '#ebf4fc', '#c4d8e9'],
@@ -356,7 +356,7 @@ const backgroundColorCode = [
 ];
 
 //文字色パターン
-const textColorCode = [
+const TEXT_COLOR_CODE = [
     ['weather', 'Clear', 'Cloudy', 'Rainy'],
     ['morning', '#ffffff', '#4D4D4F', '#353535'],
     ['afternoon', '#ffffff', '#4D4D4F', '#353535'],
@@ -420,10 +420,10 @@ function crossFadeColors(weather, time) {
     console.log(`${weather}-${timeOfDay}`);
 
     //色を取得
-    const weatherIndex = backgroundColorCode[0].indexOf(weather);
-    const timeOfDayIndex = backgroundColorCode.map(row => row[0]).indexOf(timeOfDay);
-    const bgColor = backgroundColorCode[timeOfDayIndex][weatherIndex];
-    const textColor = textColorCode[timeOfDayIndex][weatherIndex];
+    const weatherIndex = BACKGROUND_COLOR_CODE[0].indexOf(weather);
+    const timeOfDayIndex = BACKGROUND_COLOR_CODE.map(row => row[0]).indexOf(timeOfDay);
+    const bgColor = BACKGROUND_COLOR_CODE[timeOfDayIndex][weatherIndex];
+    const textColor = TEXT_COLOR_CODE[timeOfDayIndex][weatherIndex];
 
     //背景色を更新
     document.body.style.backgroundColor = bgColor;
@@ -510,6 +510,14 @@ document.addEventListener('fullscreenchange', () => {
     disableWakeLock();
 });
 
+/** ローカルストレージを消去すべきか判定 */
+function shouldClearStorage() {
+    const type = performance.getEntriesByType('navigation')[0]?.type;
+    //リロード時以外は大体削除する
+    //挙動を揃えるためback_forwardも入れてる
+    return type === 'navigate' || type === 'back_forward';
+}
+
 /** escキー長押しでフルスクリーンを抜けるようにする */
 async function lockEscapeKey() {
     //対応していない場合はreturn
@@ -525,8 +533,6 @@ async function lockEscapeKey() {
         console.info('escキーをロックできませんでした:', e)
     }
 }
-
-lockEscapeKey();
 
 
 /** 
@@ -591,7 +597,8 @@ function progressBarSet(startDate, endDate, timeTable) {
 
 let wakeLock = null; // wakeLockオブジェクトを格納する変数
 let timeoutId = 0; //タイムアウトID
-//Wake Lock ON
+
+//Wake LockをONにする関数
 async function enableWakeLock() {
     try {
         // Wake Lock APIをサポートしているか確認
@@ -609,7 +616,8 @@ async function enableWakeLock() {
     }
 }
 
-//Wake Lock OFF
+//Wake LockをOFFにする関数
+//NOTE TIMEOUT_MINUTESが0の場合は機能しない
 async function disableWakeLock() {
     try {
         // wakeLockオブジェクトが存在するか確認
@@ -632,24 +640,22 @@ async function disableWakeLock() {
 }
 
 //タイムアウトする時間（分単位）
-const TimeoutMinutes = 0;//0の場合タイムアウトは無し
-console.log(`フルスクリーンボタンを押してから${TimeoutMinutes}分スリープ機能をブロックします。`);
+const TIMEOUT_MINUTES = 0;//0の場合タイムアウトは無し
+console.log(`フルスクリーンボタンを押してから${TIMEOUT_MINUTES}分スリープ機能をブロックします。`);
 
 /** setTimeoutを実行する関数 */
 function startTimeout() {
     //0以下ならタイムアウトしない
-    if (TimeoutMinutes <= 0) {
-        return null
-    }
+    if (TIMEOUT_MINUTES <= 0) return null;
 
     //「この時間までスリープ機能をブロックします。」メッセージ
-    const timeoutTime = new Date(now.getTime() + TimeoutMinutes * 60 * 1000);
+    const timeoutTime = new Date(now.getTime() + TIMEOUT_MINUTES * 60 * 1000);
     console.log(`${timeoutTime.getHours()}:${timeoutTime.getMinutes()}:${timeoutTime.getSeconds()}までスリープ機能をブロックします。`);
 
     // 後でWake Lockを解除する
     const timeoutIdOutput = setTimeout(
         disableWakeLock, 
-        TimeoutMinutes * 60 * 1000
+        TIMEOUT_MINUTES * 60 * 1000
     );
 
     // setTimeoutのIDを返す（後でキャンセルするために必要）
