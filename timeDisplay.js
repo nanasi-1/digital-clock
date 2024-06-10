@@ -87,13 +87,13 @@ function updateSubject() {
     const nowTime = now.getHours() * 60 + now.getMinutes();
 
     /** 今日の時間割 */
-    const currentScheduleDefault = SCHEDULE.find(daySchedule => {
+    const currentSchedule = SCHEDULE.find(daySchedule => {
         //曜日から今日のスケジュールかどうか判定する
         return dayOfWeek === daySchedule[0]
     });
 
     //入力欄のplaceholderにデフォルト科目名を表示
-    currentScheduleDefault.forEach((subject, i) => {
+    currentSchedule.forEach((subject, i) => {
         //コマ数を取得、スケジュールの配列の2つ目からが科目
         const period = i - 1;
         //設定にない科目ならreturn
@@ -104,12 +104,12 @@ function updateSubject() {
             document.getElementById(`subject-${period}-2`).placeholder = subject[1];
         } else {
             document.getElementById(`subject-${period}-1`).placeholder = subject;
-            //NOTE subject-{period}-2のplaceholderが空欄にならない問題がある
+            //NOTE 日付を跨いだ時、subject-{period}-2のplaceholderが空欄にならない問題がある
         }
     });
 
     //設定されている科目名に変更
-    const currentSchedule = getSubjectValues(currentScheduleDefault);
+    getSubjectValues(currentSchedule);
 
     //...?
     if (currentSchedule == '') {
@@ -344,7 +344,6 @@ function countdownMessageOutput(endSecond, nowSecond, countdownText, nextSubject
 
     countdownText.innerText = `${nextSubjectString}まで あと${countdownMessage}`;
 }
-//NOTE 2つ目の科目のみを設定した場合デフォルト科目がjoinされないバグあり
 
 //背景パターン
 const BACKGROUND_COLOR_CODE = [
@@ -536,8 +535,7 @@ async function lockEscapeKey() {
 
 
 /** 
- * 科目名を入力するフォームを取得  
- * デフォルトに代入するため引数が必要
+ * デフォルト科目を科目設定フォームの値で上書き
  * @param {(string | string[])[]} defaultSubject 科目のデフォルト値
  */
 function getSubjectValues(defaultSubject) {
@@ -549,14 +547,15 @@ function getSubjectValues(defaultSubject) {
     }));
 
     for (let i = 0; i < subjectValues.length; i++) {//+2してるのはdefaultSubjectのズレに合わせているため
-        if (subjectValues[i][0] != '' && subjectValues[i][1] != '') {//両方空白ではない場合
+        if (subjectValues[i][0] !== '' && subjectValues[i][1] !== '') {//両方空白ではない場合
             defaultSubject[i + 2] = subjectValues[i];
-        } else if (subjectValues[i][0] != '' && subjectValues[i][1] == '') {//1つ目のみ空白ではない場合
+        } else if (subjectValues[i][0] !== '' && subjectValues[i][1] === '') {//1つ目のみ空白ではない場合
             defaultSubject[i + 2] = subjectValues[i][0];
-        } else if (subjectValues[i][0] == '' && subjectValues[i][1] != '') {//2つ目のみ空白ではない場合
+        } else if (subjectValues[i][0] === '' && subjectValues[i][1] !== '') {//2つ目のみ空白ではない場合
             defaultSubject[i + 2] = subjectValues[i][1];
         }
     }
+    //NOTE 片方の科目のみが設定されている場合、デフォルト科目がなくなるバグあり
 
     return defaultSubject;
 }
